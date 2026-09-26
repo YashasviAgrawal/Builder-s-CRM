@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { LEAD_PERMISSIONS } from "@/modules/leads";
 import { ExportLeadsButton } from "@/modules/leads/components/export-button";
+import { LeadLayoutSwitch } from "@/modules/leads/components/lead-layout-switch";
 import { LeadViewsBar } from "@/modules/leads/components/lead-views-bar";
 import { LeadsTable } from "@/modules/leads/components/leads-table";
 import { getImportBatch } from "@/modules/leads/server/import/service";
@@ -82,6 +83,7 @@ export default async function LeadsPage({ searchParams }: PageProps<"/leads">) {
           current={view}
           savedViews={savedViews}
           presets={listLeadListPresets(ctx)}
+          extra={<LeadLayoutSwitch />}
         />
         <LeadsTable
           rows={leads.rows}

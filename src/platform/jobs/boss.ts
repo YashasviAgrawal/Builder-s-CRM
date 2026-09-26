@@ -24,7 +24,8 @@ async function startBoss(role: BossRole): Promise<PgBoss> {
     connectionString: env.DATABASE_URL,
     schema: env.JOBS_SCHEMA,
     application_name: `crm-${role}`,
-    max: role === "worker" ? 10 : 3,
+    // The web server only enqueues jobs (inside the caller's transaction): two connections are plenty.
+    max: role === "worker" ? Math.min(10, env.DATABASE_POOL_MAX) : 2,
     supervise: role === "worker",
     schedule: role === "worker",
     migrate: true,

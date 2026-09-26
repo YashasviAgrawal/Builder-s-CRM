@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { activeNavKey } from "./nav-links";
+import { activeNavKey, nestNavItems } from "./nav-links";
 
 const items = [
   { key: "dashboard", href: "/dashboard" },
@@ -20,5 +20,20 @@ describe("activeNavKey", () => {
     expect(activeNavKey(items, "/team")).toBe("team");
     expect(activeNavKey(items, "/profile")).toBe("settings");
     expect(activeNavKey(items, "/leadsx")).toBeNull();
+  });
+});
+
+describe("nestNavItems", () => {
+  it("puts sub-items under their parent and keeps orphans at the top level", () => {
+    const tree = nestNavItems([
+      { key: "leads" },
+      { key: "board", parent: "leads" },
+      { key: "unassigned", parent: "leads" },
+      { key: "workload", parent: "team" },
+      { key: "reports" },
+    ]);
+    expect(tree.map((node) => node.item.key)).toEqual(["leads", "workload", "reports"]);
+    expect(tree[0]!.children.map((child) => child.key)).toEqual(["board", "unassigned"]);
+    expect(tree[1]!.children).toEqual([]);
   });
 });

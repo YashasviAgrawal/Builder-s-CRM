@@ -93,6 +93,23 @@ export interface StatusPermissions {
 }
 
 /**
+ * Statuses a person may move a lead to by hand: active ones other than the current, workflow statuses only with the
+ * override permission, and out of a closed status only with reopen rights (the server checks the same rules).
+ */
+export function statusChoices(
+  statuses: LeadStatusRow[],
+  current: { id: string; isTerminal: boolean } | undefined,
+  permissions: StatusPermissions,
+): LeadStatusRow[] {
+  return statuses.filter((status) => {
+    if (!status.isActive || status.id === current?.id) return false;
+    if (SYSTEM_DRIVEN_STATUS_KEYS.includes(status.key) && !permissions.canOverride) return false;
+    if (current?.isTerminal && !status.isTerminal && !permissions.canReopen) return false;
+    return true;
+  });
+}
+
+/**
  * Status change (M04-08) for one lead or a bulk selection. Only valid targets are offered: active statuses,
  * workflow statuses only with the override permission, and leaving a closed status only with reopen rights.
  * The server validates the same rules.
@@ -104,6 +121,9 @@ export function StatusDialog({
   permissions,
   trigger,
   onDone,
+  open: openProp,
+  onOpenChange,
+  initialStatusId = "",
 }: {
   statuses: LeadStatusRow[];
   /** Current status (single lead); omitted for bulk changes. */
@@ -117,23 +137,29 @@ export function StatusDialog({
   };
   leadIds: string[];
   permissions: StatusPermissions;
+  /** Button that opens the dialog; `null` renders none (the dialog is then opened through `open`). */
   trigger?: ReactNode;
   onDone?: () => void;
+  /** Controlled mode (e.g. the pipeline board opens it after a card is dropped on a column). */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  /** Target status chosen up front; the rest of the form stays the same. */
+  initialStatusId?: string;
 }) {
   const router = useRouter();
-  const [open, setOpen] = useState(false);
-  const [statusId, setStatusId] = useState("");
+  const [openState, setOpenState] = useState(false);
+  const open = openProp ?? openState;
+  const setOpen = (next: boolean) => {
+    if (openProp === undefined) setOpenState(next);
+    onOpenChange?.(next);
+  };
+  const [statusId, setStatusId] = useState(initialStatusId);
   const [reason, setReason] = useState("");
   const [details, setDetails] = useState<Details>({});
   const [busy, setBusy] = useState(false);
   const target = statuses.find((status) => status.id === statusId);
 
-  const choices = statuses.filter((status) => {
-    if (!status.isActive || status.id === current?.id) return false;
-    if (SYSTEM_DRIVEN_STATUS_KEYS.includes(status.key) && !permissions.canOverride) return false;
-    if (current?.isTerminal && !status.isTerminal && !permissions.canReopen) return false;
-    return true;
-  });
+  const choices = statusChoices(statuses, current, permissions);
   const grouped = STATUS_CATEGORIES.map((category) => ({
     ...category,
     statuses: choices.filter((status) => status.category === category.value),
@@ -184,13 +210,15 @@ export function StatusDialog({
 
   return (
     <Dialog open={open} onOpenChange={(next) => !busy && setOpen(next)}>
-      <DialogTrigger asChild>
-        {trigger ?? (
-          <Button>
-            <ArrowRightLeft /> Change status
-          </Button>
-        )}
-      </DialogTrigger>
+      {trigger === null ? null : (
+        <DialogTrigger asChild>
+          {trigger ?? (
+            <Button>
+              <ArrowRightLeft /> Change status
+            </Button>
+          )}
+        </DialogTrigger>
+      )}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>

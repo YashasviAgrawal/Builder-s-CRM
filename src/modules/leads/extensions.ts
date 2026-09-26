@@ -58,6 +58,11 @@ export interface LeadActionTarget {
 export interface LeadDetailAction {
   key: string;
   order: number;
+  /**
+   * `primary` (default): an everyday action shown as a labelled button on the left of the lead's action bar.
+   * `secondary`: an occasional utility, shown compactly with the lead's own utilities on the right.
+   */
+  placement?: "primary" | "secondary";
   render: (props: { lead: LeadActionTarget }) => Promise<ReactNode> | ReactNode;
 }
 

@@ -47,7 +47,36 @@ export function activeNavKey(
   return best?.key ?? null;
 }
 
-/** Sidebar navigation built from module manifests and filtered by the user's permissions (M01-21). */
+export interface NavTreeItem<T> {
+  item: T;
+  children: T[];
+}
+
+/**
+ * Nests sub-items under their parent (in order); an item whose parent the user cannot see stays at the top level.
+ */
+export function nestNavItems<T extends Pick<NavItem, "key" | "parent">>(
+  items: readonly T[],
+): NavTreeItem<T>[] {
+  const keys = new Set(items.map((item) => item.key));
+  const tree: NavTreeItem<T>[] = [];
+  const byKey = new Map<string, NavTreeItem<T>>();
+  for (const item of items) {
+    if (item.parent && keys.has(item.parent)) continue;
+    const node: NavTreeItem<T> = { item, children: [] };
+    tree.push(node);
+    byKey.set(item.key, node);
+  }
+  for (const item of items) {
+    if (item.parent && keys.has(item.parent)) byKey.get(item.parent)?.children.push(item);
+  }
+  return tree;
+}
+
+/**
+ * Sidebar navigation built from module manifests and filtered by the user's permissions (M01-21). Sub-items (e.g.
+ * "Unassigned" under "Leads") unfold beneath their parent while its area is open, so the sidebar stays short.
+ */
 export function NavLinks({
   permissions,
   collapsed = false,
@@ -60,10 +89,60 @@ export function NavLinks({
   const pathname = usePathname();
   const allowed = new Set(permissions);
   const groups = appRegistry.navigation({ has: (key) => allowed.has("*") || allowed.has(key) });
-  const activeKey = activeNavKey(
-    groups.flatMap((group) => group.items),
-    pathname,
-  );
+  const everyItem = groups.flatMap((group) => group.items);
+  const activeKey = activeNavKey(everyItem, pathname);
+
+  const renderItem = (
+    item: NavItem,
+    options: { child?: boolean; parentOfActive?: boolean } = {},
+  ) => {
+    const active = item.key === activeKey;
+    const Icon = item.icon;
+    const link = (
+      <Link
+        key={item.key}
+        href={item.href}
+        onClick={onNavigate}
+        aria-current={active ? "page" : undefined}
+        className={cn(
+          "group/nav relative flex items-center gap-3 rounded-md px-3 font-medium text-sidebar-foreground/85 transition-colors outline-none hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-[3px] focus-visible:ring-sidebar-ring/50",
+          options.child ? "h-8 text-[13px]" : "h-9 text-[13.5px]",
+          active && "bg-sidebar-active text-white hover:bg-sidebar-active",
+          options.parentOfActive && "text-white",
+          collapsed && "justify-center px-0",
+        )}
+      >
+        {active && !options.child ? (
+          <span
+            aria-hidden
+            className="absolute top-1/2 -left-3 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-sidebar-primary"
+          />
+        ) : null}
+        <Icon
+          className={cn(
+            "shrink-0 transition-colors",
+            options.child && !collapsed ? "size-4" : "size-[18px]",
+            active || options.parentOfActive
+              ? "text-sidebar-primary"
+              : "text-sidebar-foreground/60 group-hover/nav:text-sidebar-accent-foreground",
+          )}
+        />
+        {collapsed ? (
+          <span className="sr-only">{item.label}</span>
+        ) : (
+          <span className="truncate">{item.label}</span>
+        )}
+      </Link>
+    );
+    return collapsed ? (
+      <Tooltip key={item.key}>
+        <TooltipTrigger asChild>{link}</TooltipTrigger>
+        <TooltipContent side="right">{item.label}</TooltipContent>
+      </Tooltip>
+    ) : (
+      link
+    );
+  };
 
   return (
     <nav aria-label="Main" className="flex flex-col gap-5">
@@ -76,49 +155,24 @@ export function NavLinks({
           ) : SECTION_LABELS[group.section] ? (
             <span aria-hidden className="mx-auto mb-1.5 h-px w-6 bg-sidebar-border" />
           ) : null}
-          {group.items.map((item) => {
-            const active = item.key === activeKey;
-            const Icon = item.icon;
-            const link = (
-              <Link
-                key={item.key}
-                href={item.href}
-                onClick={onNavigate}
-                aria-current={active ? "page" : undefined}
-                className={cn(
-                  "group/nav relative flex h-9 items-center gap-3 rounded-md px-3 text-[13.5px] font-medium text-sidebar-foreground/85 transition-colors outline-none hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-[3px] focus-visible:ring-sidebar-ring/50",
-                  active && "bg-sidebar-active text-white hover:bg-sidebar-active",
-                  collapsed && "justify-center px-0",
-                )}
-              >
-                {active ? (
-                  <span
-                    aria-hidden
-                    className="absolute top-1/2 -left-3 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-sidebar-primary"
-                  />
+          {nestNavItems(group.items).map(({ item, children }) => {
+            const open =
+              item.key === activeKey || children.some((child) => child.key === activeKey);
+            const childActive = children.some((child) => child.key === activeKey);
+            return (
+              <div key={item.key} className="flex flex-col gap-0.5">
+                {renderItem(item, { parentOfActive: childActive })}
+                {open && children.length ? (
+                  <div
+                    className={cn(
+                      "flex flex-col gap-0.5",
+                      !collapsed && "ml-[21px] border-l border-sidebar-border pl-2",
+                    )}
+                  >
+                    {children.map((child) => renderItem(child, { child: true }))}
+                  </div>
                 ) : null}
-                <Icon
-                  className={cn(
-                    "size-[18px] shrink-0 transition-colors",
-                    active
-                      ? "text-sidebar-primary"
-                      : "text-sidebar-foreground/60 group-hover/nav:text-sidebar-accent-foreground",
-                  )}
-                />
-                {collapsed ? (
-                  <span className="sr-only">{item.label}</span>
-                ) : (
-                  <span className="truncate">{item.label}</span>
-                )}
-              </Link>
-            );
-            return collapsed ? (
-              <Tooltip key={item.key}>
-                <TooltipTrigger asChild>{link}</TooltipTrigger>
-                <TooltipContent side="right">{item.label}</TooltipContent>
-              </Tooltip>
-            ) : (
-              link
+              </div>
             );
           })}
         </div>

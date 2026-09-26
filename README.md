@@ -83,6 +83,7 @@ configurations, amenities) for every organization. There is no public sign-up: a
 | `pnpm db:migrate` | Create/apply a migration in development |
 | `pnpm db:deploy` | Apply migrations (CI/production) |
 | `pnpm db:seed` | Idempotent seed |
+| `pnpm db:demo` | Add a realistic demo dataset (~60 leads with calls, follow-ups, visits, bookings) to the default organization; `-- --drop` removes it, `-- --dry-run` previews it. Never in production |
 | `pnpm db:studio` | Prisma Studio |
 | `pnpm services:up` / `pnpm services:down` | Start/stop docker-compose services |
 

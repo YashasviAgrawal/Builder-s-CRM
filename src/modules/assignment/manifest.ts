@@ -12,6 +12,7 @@ export const assignmentManifest: ModuleManifest = {
   nav: [
     {
       key: "assignment.unassigned",
+      parent: "leads.list",
       label: "Unassigned",
       href: "/leads/unassigned",
       icon: Inbox,
@@ -21,6 +22,7 @@ export const assignmentManifest: ModuleManifest = {
     },
     {
       key: "assignment.workload",
+      parent: "identity.team",
       label: "Team workload",
       href: "/team/workload",
       icon: Gauge,

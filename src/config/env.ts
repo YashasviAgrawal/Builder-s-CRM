@@ -26,6 +26,11 @@ export const env = createEnv({
      * Prisma's defaults (5 s / 2 s) — creating a lead runs dozens of queries in one transaction.
      */
     DB_TRANSACTION_TIMEOUT_MS: z.coerce.number().int().min(1000).default(30_000),
+    /**
+     * Most database connections one process keeps open. Hosted poolers cap clients across every process (Supabase's
+     * session pooler: 15 on small plans), so web + worker + scripts must stay under that cap together.
+     */
+    DATABASE_POOL_MAX: z.coerce.number().int().min(1).max(100).default(10),
     DB_TRANSACTION_MAX_WAIT_MS: z.coerce.number().int().min(1000).default(15_000),
     /** Single-tenant mode: slug of the organization used until authentication (M02) resolves it. */
     DEFAULT_ORGANIZATION_SLUG: z.string().min(1).default("default"),

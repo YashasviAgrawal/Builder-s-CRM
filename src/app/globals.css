@@ -100,25 +100,26 @@
   --elevation-1: 0 1px 2px rgb(27 38 50 / 0.05);
   --elevation-2: 0 1px 2px rgb(27 38 50 / 0.05), 0 8px 24px -12px rgb(27 38 50 / 0.18);
   --elevation-3: 0 2px 6px rgb(27 38 50 / 0.06), 0 20px 48px -16px rgb(27 38 50 / 0.3);
-  /* Data visualization (M10): categorical series in fixed order, validated for colour-vision deficiency on the card
-     surface (worst adjacent CVD ΔE 9.1 light / 8.4 dark); slots 3–5 are below 3:1 in light mode, so charts always
-     carry labels or a table. Sequential magnitude uses --series-1's ramp. */
-  --series-1: #2a78d6;
-  --series-2: #eb6834;
-  --series-3: #1baf7a;
-  --series-4: #eda100;
-  --series-5: #e87ba4;
-  --series-6: #008300;
+  /* Data visualization (M10), Harbor-tuned: ocean navy first, flame orange second. Fixed order, validated on the
+     card surface with the dataviz validator — worst adjacent CVD ΔE 10.9 (tritan 9.6) light / 12.2 (tritan 10.5)
+     dark, normal-vision ≥ 15; only slot 4 (gold) is below 3:1 in light mode, so charts always carry labels or a
+     table. Sequential magnitude uses --series-1's ramp (--viz-seq-*, validated as an ordinal ramp). */
+  --series-1: #3a6ea5;
+  --series-2: #df7a31;
+  --series-3: #1f9b8a;
+  --series-4: #d2a01c;
+  --series-5: #d46a96;
+  --series-6: #3c8a3c;
   --series-7: #4a3aa7;
-  --series-8: #e34948;
+  --series-8: #d9534f;
   --viz-grid: #e6e1db;
   --viz-axis: #c9c1b1;
   --viz-muted: #86868a;
-  --viz-seq-1: #86b6ef;
-  --viz-seq-2: #5598e7;
-  --viz-seq-3: #2a78d6;
-  --viz-seq-4: #1c5cab;
-  --viz-seq-5: #104281;
+  --viz-seq-1: #8fb0d8;
+  --viz-seq-2: #6590c7;
+  --viz-seq-3: #3a6ea5;
+  --viz-seq-4: #2c5785;
+  --viz-seq-5: #1f4166;
   --sidebar: #22303f;
   --sidebar-foreground: #c8d9e6;
   --sidebar-primary: #ffb162;
@@ -162,22 +163,22 @@
   --elevation-1: 0 1px 2px rgb(0 0 0 / 0.3);
   --elevation-2: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px -12px rgb(0 0 0 / 0.6);
   --elevation-3: 0 2px 6px rgb(0 0 0 / 0.4), 0 20px 48px -16px rgb(0 0 0 / 0.7);
-  --series-1: #3987e5;
-  --series-2: #d95926;
-  --series-3: #199e70;
-  --series-4: #c98500;
+  --series-1: #5a8fcf;
+  --series-2: #d46d2a;
+  --series-3: #26a08c;
+  --series-4: #bf8a12;
   --series-5: #d55181;
   --series-6: #008300;
-  --series-7: #9085e9;
-  --series-8: #e66767;
+  --series-7: #8f82e6;
+  --series-8: #e5665f;
   --viz-grid: #26313d;
   --viz-axis: #36434f;
   --viz-muted: #8a939c;
-  --viz-seq-1: #184f95;
-  --viz-seq-2: #1c5cab;
-  --viz-seq-3: #2a78d6;
-  --viz-seq-4: #5598e7;
-  --viz-seq-5: #86b6ef;
+  --viz-seq-1: #3b6396;
+  --viz-seq-2: #4a78b2;
+  --viz-seq-3: #5d8dcb;
+  --viz-seq-4: #7fa6db;
+  --viz-seq-5: #a3c1e8;
   --sidebar: #0e151d;
   --sidebar-foreground: #c8d9e6;
   --sidebar-primary: #ffb162;

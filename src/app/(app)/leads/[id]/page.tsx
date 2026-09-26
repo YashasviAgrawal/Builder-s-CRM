@@ -14,6 +14,7 @@ import { AttachmentsPanel } from "@/modules/leads/components/attachments-panel";
 import { LeadStatusBadge, TemperatureBadge } from "@/modules/leads/components/badges";
 import { InterestsCard } from "@/modules/leads/components/interests-card";
 import { LeadHeaderActions } from "@/modules/leads/components/lead-header-actions";
+import { LeadJourney } from "@/modules/leads/components/lead-journey";
 import { NotesPanel } from "@/modules/leads/components/notes-panel";
 import { LeadTimeline } from "@/modules/leads/components/timeline";
 import { BUYING_TIMELINES, PURPOSES } from "@/modules/leads/constants";
@@ -68,6 +69,31 @@ export default async function LeadPage({ params }: PageProps<"/leads/[id]">) {
     .extensions("lead.detail.panel")
     .filter((panel) => !panel.permission || ctx.permissions.has(panel.permission))
     .sort((a, b) => a.order - b.order);
+  const actionTarget = {
+    id: lead.id,
+    number: lead.number,
+    name: lead.name,
+    ownerId: lead.owner?.membershipId ?? null,
+    ownerName: lead.owner?.name ?? null,
+    statusKey: lead.status.key,
+    statusCategory: lead.status.category,
+    isTerminal: lead.status.isTerminal,
+  };
+  /** Other modules' actions for this lead, everyday ones (left of the bar) or utilities (right). */
+  const renderActions = (placement: "primary" | "secondary") =>
+    Promise.all(
+      actions
+        .filter((action) => (action.placement ?? "primary") === placement)
+        .map(async (action) => (
+          <span key={action.key} className="contents">
+            {await action.render({ lead: actionTarget })}
+          </span>
+        )),
+    );
+  const [primaryActions, secondaryActions] = await Promise.all([
+    renderActions("primary"),
+    renderActions("secondary"),
+  ]);
   const money = (value: string | null) =>
     value ? formatMoney(value, regional, { compact: true }) : null;
   const label = (list: readonly { value: string; label: string }[], value: string | null) =>
@@ -115,36 +141,6 @@ export default async function LeadPage({ params }: PageProps<"/leads/[id]">) {
           </span>
         }
         breadcrumbs={[{ label: "Leads", href: "/leads" }, { label: lead.number }]}
-        actions={
-          <>
-            {await Promise.all(
-              actions.map(async (action) => (
-                <span key={action.key} className="contents">
-                  {await action.render({
-                    lead: {
-                      id: lead.id,
-                      number: lead.number,
-                      name: lead.name,
-                      ownerId: lead.owner?.membershipId ?? null,
-                      ownerName: lead.owner?.name ?? null,
-                      statusKey: lead.status.key,
-                      statusCategory: lead.status.category,
-                      isTerminal: lead.status.isTerminal,
-                    },
-                  })}
-                </span>
-              )),
-            )}
-            <LeadHeaderActions
-              lead={lead}
-              statuses={statuses}
-              canUpdate={canUpdate}
-              canChangeStatus={canChangeStatus}
-              canDelete={ctx.permissions.has(LEAD_PERMISSIONS.delete)}
-              statusPermissions={statusPermissions(ctx)}
-            />
-          </>
-        }
       />
 
       {lead.duplicateStatus !== "NONE" &&
@@ -183,6 +179,23 @@ export default async function LeadPage({ params }: PageProps<"/leads/[id]">) {
           </p>
         </div>
       ) : null}
+
+      <div className="mb-6 flex flex-wrap items-center gap-2 rounded-xl border bg-card p-2 shadow-card">
+        {primaryActions}
+        <div className="ml-auto flex flex-wrap items-center gap-1.5">
+          {secondaryActions}
+          <LeadHeaderActions
+            lead={lead}
+            statuses={statuses}
+            canUpdate={canUpdate}
+            canChangeStatus={canChangeStatus}
+            canDelete={ctx.permissions.has(LEAD_PERMISSIONS.delete)}
+            statusPermissions={statusPermissions(ctx)}
+          />
+        </div>
+      </div>
+
+      <LeadJourney lead={lead} regional={regional} />
 
       <div className="grid items-start gap-6 xl:grid-cols-3">
         <div className="space-y-6">

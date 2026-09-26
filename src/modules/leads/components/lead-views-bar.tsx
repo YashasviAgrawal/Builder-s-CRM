@@ -3,7 +3,7 @@
 import { Bookmark, BookmarkPlus, ListFilter, Trash2, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -48,7 +48,10 @@ export function LeadViewsBar({
   savedViews,
   presets = [],
   counts,
+  extra,
 }: {
+  /** Controls shown next to "Saved views" (e.g. the table / board switch). */
+  extra?: ReactNode;
   views: LeadView[];
   current: LeadView;
   savedViews: SavedViewRow[];
@@ -107,7 +110,8 @@ export function LeadViewsBar({
           </Link>
         ))}
       </nav>
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
+        {extra}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm">

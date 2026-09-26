@@ -7,25 +7,27 @@ export type StatusTone = NonNullable<VariantProps<typeof badgeVariants>["variant
 
 /**
  * Coloured status label (M01-22). Pass a `tone`, or a `color` (hex from configurable masters such as lead
- * statuses) to render a dot in that colour.
+ * statuses) to render a dot in that colour. A long label is cut with an ellipsis when `className` limits the width.
  */
 export function StatusBadge({
   label,
   tone = "muted",
   color,
   className,
+  title,
 }: {
   label: string;
   tone?: StatusTone;
   color?: string | null;
   className?: string;
+  title?: string;
 }) {
   return (
-    <Badge variant={color ? "outline" : tone} className={cn("gap-1.5", className)}>
+    <Badge variant={color ? "outline" : tone} className={cn("gap-1.5", className)} title={title}>
       {color ? (
         <span aria-hidden className="size-2 rounded-full" style={{ backgroundColor: color }} />
       ) : null}
-      {label}
+      <span className="truncate">{label}</span>
     </Badge>
   );
 }

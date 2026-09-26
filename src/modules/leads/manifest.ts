@@ -1,4 +1,4 @@
-import { Contact, KeyRound, ListChecks } from "lucide-react";
+import { Contact, KeyRound, ListChecks, SquareKanban } from "lucide-react";
 
 import type { ModuleManifest } from "@/platform/registry/types";
 
@@ -18,6 +18,16 @@ export const leadsManifest: ModuleManifest = {
       section: "main",
       order: 10,
       permission: LEAD_PERMISSIONS.view,
+    },
+    {
+      key: "leads.board",
+      label: "Pipeline",
+      href: "/leads/board",
+      icon: SquareKanban,
+      section: "main",
+      order: 10.5,
+      permission: LEAD_PERMISSIONS.view,
+      parent: "leads.list",
     },
   ],
   settings: [

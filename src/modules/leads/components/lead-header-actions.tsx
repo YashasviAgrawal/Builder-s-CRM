@@ -6,14 +6,17 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
-import { Button } from "@/components/ui/button";
+import { TooltipIconButton } from "@/components/shared/tooltip-icon-button";
 import { actionErrorMessage } from "@/lib/action-result";
 
 import { deleteLeadAction } from "../actions";
 import type { LeadStatusRow } from "../server/masters";
 import { StatusDialog, type StatusPermissions } from "./status-dialog";
 
-/** Quick actions on the lead page (M04-07). */
+/**
+ * The lead's own actions on the lead page (M04-07): call, e-mail, edit and delete as compact utilities, and
+ * "Change status" as the one primary button of the action bar.
+ */
 export function LeadHeaderActions({
   lead,
   statuses,
@@ -46,45 +49,35 @@ export function LeadHeaderActions({
   return (
     <>
       {lead.mobile ? (
-        <Button asChild variant="outline" size="icon" aria-label={`Call ${lead.mobile}`}>
+        <TooltipIconButton asChild variant="outline" label={`Call ${lead.mobile}`}>
           <a href={`tel:${lead.mobile}`}>
             <Phone />
           </a>
-        </Button>
+        </TooltipIconButton>
       ) : null}
       {lead.email ? (
-        <Button asChild variant="outline" size="icon" aria-label={`E-mail ${lead.email}`}>
+        <TooltipIconButton asChild variant="outline" label={`E-mail ${lead.email}`}>
           <a href={`mailto:${lead.email}`}>
             <Mail />
           </a>
-        </Button>
+        </TooltipIconButton>
       ) : null}
       {canUpdate ? (
-        <Button asChild variant="outline">
+        <TooltipIconButton asChild variant="outline" label="Edit">
           <Link href={`/leads/${lead.id}/edit`}>
-            <Pencil /> Edit
+            <Pencil />
           </Link>
-        </Button>
-      ) : null}
-      {canChangeStatus ? (
-        <StatusDialog
-          statuses={statuses}
-          current={lead.status}
-          leadIds={[lead.id]}
-          permissions={statusPermissions}
-        />
+        </TooltipIconButton>
       ) : null}
       {canDelete ? (
         <ConfirmDialog
           trigger={
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label="Delete lead"
-              className="text-destructive hover:text-destructive"
+            <TooltipIconButton
+              label="Delete lead"
+              className="text-destructive hover:bg-destructive/10 hover:text-destructive"
             >
               <Trash2 />
-            </Button>
+            </TooltipIconButton>
           }
           title={`Delete ${lead.number}?`}
           description="Use this for junk or test leads only. The lead disappears from every list; its history stays in the audit log."
@@ -100,6 +93,17 @@ export function LeadHeaderActions({
             router.push("/leads");
           }}
         />
+      ) : null}
+      {canChangeStatus ? (
+        <>
+          <span aria-hidden className="mx-1 hidden h-6 w-px bg-border sm:block" />
+          <StatusDialog
+            statuses={statuses}
+            current={lead.status}
+            leadIds={[lead.id]}
+            permissions={statusPermissions}
+          />
+        </>
       ) : null}
     </>
   );

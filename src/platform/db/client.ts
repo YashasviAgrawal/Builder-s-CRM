@@ -10,7 +10,12 @@ import { PrismaClient } from "@/generated/prisma/client";
  * Legitimate uses: tenant resolution, seeding, background-job infrastructure and cross-tenant platform tasks.
  */
 function createPrismaClient() {
-  const adapter = new PrismaPg({ connectionString: env.DATABASE_URL });
+  const adapter = new PrismaPg({
+    connectionString: env.DATABASE_URL,
+    max: env.DATABASE_POOL_MAX,
+    // Hand idle connections back quickly: poolers count them against the client cap.
+    idleTimeoutMillis: 10_000,
+  });
   return new PrismaClient({
     adapter,
     log: env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],

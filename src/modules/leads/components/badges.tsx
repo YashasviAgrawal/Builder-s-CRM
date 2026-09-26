@@ -5,7 +5,10 @@ import { cn } from "@/lib/utils";
 
 import { TEMPERATURES } from "../constants";
 
-/** Lead status with its configured colour (M04-03). */
+/**
+ * Lead status with its configured colour (M04-03). The colour marks the dot and a light tint; the label keeps the
+ * text colour, so any colour an organization picks stays readable in light and dark mode.
+ */
 export function LeadStatusBadge({
   label,
   color,
@@ -18,8 +21,8 @@ export function LeadStatusBadge({
   return (
     <Badge
       variant="outline"
-      className={cn("gap-1.5 border-transparent", className)}
-      style={{ backgroundColor: `${color}1f`, color }}
+      className={cn("gap-1.5 border-transparent text-foreground", className)}
+      style={{ backgroundColor: `${color}24`, boxShadow: `inset 0 0 0 1px ${color}33` }}
     >
       <span aria-hidden className="size-2 rounded-full" style={{ backgroundColor: color }} />
       {label}

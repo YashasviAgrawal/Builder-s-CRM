@@ -77,7 +77,12 @@ export function VisitsTable({
       meta: { label: "When" },
       header: ({ column }) => <DataTableColumnHeader column={column} title="When" />,
       cell: ({ row }) => (
-        <span className="whitespace-nowrap">{format.dateTime(row.original.scheduledAt)}</span>
+        <span className="flex flex-col whitespace-nowrap">
+          <span>{format.date(row.original.scheduledAt)}</span>
+          <span className="text-xs text-muted-foreground">
+            {format.time(row.original.scheduledAt)}
+          </span>
+        </span>
       ),
     },
     {
@@ -147,6 +152,7 @@ export function VisitsTable({
             <VisitOutcomeBadge
               label={row.original.outcome.label}
               category={row.original.outcome.category}
+              className="max-w-40"
             />
           ) : null}
         </span>

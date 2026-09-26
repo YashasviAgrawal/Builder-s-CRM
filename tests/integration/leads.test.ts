@@ -23,6 +23,7 @@ import {
   deleteLead,
   getLead,
   type LeadFilters,
+  listLeadBoard,
   listLeads,
   updateLead,
 } from "@/modules/leads/server/leads";
@@ -353,6 +354,39 @@ describe("leads (M04)", () => {
       expect(await ids({ ownerId: "unassigned" })).toContain(adminLead.id);
       expect(await ids({ statusCategory: "INVALID" })).not.toContain(execLead.id);
       expect(await ids({ projectId: "not-a-uuid" })).toContain(execLead.id);
+    });
+  });
+
+  describe("pipeline board", () => {
+    it("shows the open leads in scope as status columns with their counts", async () => {
+      const open = <T extends { status: { category: string } }>(rows: T[]) =>
+        rows.filter((row) => !["LOST", "INVALID"].includes(row.status.category));
+      const columns = await listLeadBoard(env.ctx.admin, page, noFilters);
+      const keys = columns.map((column) => column.status.key);
+      expect(keys).not.toContain("LOST");
+      expect(keys).not.toContain("INVALID");
+      for (const column of columns) {
+        expect(column.rows.every((row) => row.status.id === column.status.id)).toBe(true);
+      }
+      const listed = open((await listLeads(env.ctx.admin, page, noFilters)).rows);
+      const boardIds = columns.flatMap((column) => column.rows.map((row) => row.id));
+      expect(boardIds.toSorted()).toEqual(listed.map((row) => row.id).toSorted());
+      expect(columns.reduce((sum, column) => sum + column.total, 0)).toBe(listed.length);
+
+      const execIds = (await listLeadBoard(env.ctx.exec1, page, noFilters)).flatMap((column) =>
+        column.rows.map((row) => row.id),
+      );
+      expect(execIds).toContain(execLead.id);
+      expect(execIds).not.toContain(otherTeamLead.id);
+      expect(execIds).not.toContain(adminLead.id);
+
+      const withClosed = await listLeadBoard(env.ctx.admin, page, noFilters, {
+        includeClosed: true,
+      });
+      expect(withClosed.map((column) => column.status.key)).toEqual(
+        expect.arrayContaining(["LOST", "NOT_INTERESTED"]),
+      );
+      expect(withClosed.map((column) => column.status.key)).not.toContain("INVALID");
     });
   });
 

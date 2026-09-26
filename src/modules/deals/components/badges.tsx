@@ -41,9 +41,23 @@ const OUTCOME_TONES: Record<VisitOutcomeCategory, StatusTone> = {
   NEGATIVE: "warning",
 };
 
-export function VisitOutcomeBadge({ label, category }: { label: string; category: string }) {
+export function VisitOutcomeBadge({
+  label,
+  category,
+  className,
+}: {
+  label: string;
+  category: string;
+  /** Limit the width (e.g. in tables); the full label shows on hover. */
+  className?: string;
+}) {
   return (
-    <StatusBadge label={label} tone={OUTCOME_TONES[category as VisitOutcomeCategory] ?? "muted"} />
+    <StatusBadge
+      label={label}
+      tone={OUTCOME_TONES[category as VisitOutcomeCategory] ?? "muted"}
+      className={className}
+      title={className ? label : undefined}
+    />
   );
 }
 

@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { formatPhone } from "@/lib/phone";
-import { cn } from "@/lib/utils";
+import { cn, initials } from "@/lib/utils";
 import { clientUiRegistry } from "@/modules/registry.client";
 
 import { STATUS_CATEGORIES, TEMPERATURES } from "../constants";
@@ -232,7 +232,7 @@ export function LeadsTable({
       enableHiding: false,
       header: ({ column }) => <DataTableColumnHeader column={column} title="Lead" />,
       cell: ({ row }) => (
-        <Link href={`/leads/${row.original.id}`} className="flex min-w-40 flex-col hover:underline">
+        <Link href={`/leads/${row.original.id}`} className="flex min-w-36 flex-col hover:underline">
           <span className="flex items-center gap-2 font-medium">
             {row.original.name}
             {row.original.duplicateStatus === "SUSPECTED" ? (
@@ -258,7 +258,12 @@ export function LeadsTable({
             <span>—</span>
           )}
           {row.original.email ? (
-            <span className="text-xs text-muted-foreground">{row.original.email}</span>
+            <span
+              className="max-w-40 truncate text-xs text-muted-foreground"
+              title={row.original.email}
+            >
+              {row.original.email}
+            </span>
           ) : null}
         </div>
       ),
@@ -282,9 +287,23 @@ export function LeadsTable({
         if (!due) return <span className="text-muted-foreground">—</span>;
         const overdue = new Date(due).getTime() < new Date(now).getTime();
         return (
-          <span className={cn("whitespace-nowrap", overdue && "font-medium text-destructive")}>
-            {format.dateTime(due)}
-            {overdue ? <span className="ml-1 text-xs">(overdue)</span> : null}
+          <span className="flex flex-col whitespace-nowrap">
+            <span
+              className={cn(
+                "inline-flex items-center gap-1.5 text-sm",
+                overdue && "font-medium text-highlight-ink",
+              )}
+            >
+              {overdue ? (
+                <>
+                  <span aria-hidden className="size-1.5 rounded-full bg-highlight" />
+                  Overdue
+                </>
+              ) : (
+                <RelativeTime value={due} />
+              )}
+            </span>
+            <span className="text-xs text-muted-foreground">{format.dateTime(due)}</span>
           </span>
         );
       },
@@ -295,21 +314,49 @@ export function LeadsTable({
       enableSorting: false,
       header: "Owner",
       cell: ({ row }) =>
-        row.original.ownerName ?? <span className="text-muted-foreground">Unassigned</span>,
-    },
-    {
-      id: "projects",
-      meta: { label: "Projects" },
-      enableSorting: false,
-      header: "Projects",
-      cell: ({ row }) =>
-        row.original.projects.length ? (
-          <span className="line-clamp-2 max-w-48 whitespace-normal">
-            {row.original.projects.join(", ")}
+        row.original.ownerName ? (
+          <span className="flex items-center gap-2 whitespace-nowrap">
+            <span
+              aria-hidden
+              className="flex size-6 shrink-0 items-center justify-center rounded-full bg-accent text-[10px] font-semibold text-primary"
+            >
+              {initials(row.original.ownerName)}
+            </span>
+            {row.original.ownerName}
           </span>
         ) : (
-          <span className="text-muted-foreground">—</span>
+          <span className="text-muted-foreground">Unassigned</span>
         ),
+    },
+    {
+      // What the customer wants: the project(s) and, beneath, the budget.
+      id: "projects",
+      meta: { label: "Interest" },
+      enableSorting: false,
+      header: "Interest",
+      cell: ({ row }) => {
+        const { projects, budgetMin, budgetMax } = row.original;
+        const budget = [budgetMin, budgetMax]
+          .filter(Boolean)
+          .map((value) => format.money(value, { compact: true }))
+          .join(" – ");
+        if (!projects.length && !budget) return <span className="text-muted-foreground">—</span>;
+        return (
+          <span className="flex max-w-52 flex-col">
+            {projects.length ? (
+              <span className="flex items-center gap-1.5" title={projects.join(", ")}>
+                <span className="truncate">{projects[0]}</span>
+                {projects.length > 1 ? (
+                  <Badge variant="muted" className="px-1.5">
+                    +{projects.length - 1}
+                  </Badge>
+                ) : null}
+              </span>
+            ) : null}
+            {budget ? <span className="text-xs text-muted-foreground">{budget}</span> : null}
+          </span>
+        );
+      },
     },
     {
       id: "source",
@@ -318,23 +365,6 @@ export function LeadsTable({
       header: "Source",
       cell: ({ row }) =>
         row.original.sourceName ?? <span className="text-muted-foreground">—</span>,
-    },
-    {
-      id: "budget",
-      meta: { label: "Budget" },
-      enableSorting: false,
-      header: "Budget",
-      cell: ({ row }) =>
-        row.original.budgetMin || row.original.budgetMax ? (
-          <span className="whitespace-nowrap">
-            {[row.original.budgetMin, row.original.budgetMax]
-              .filter(Boolean)
-              .map((value) => format.money(value, { compact: true }))
-              .join(" – ")}
-          </span>
-        ) : (
-          <span className="text-muted-foreground">—</span>
-        ),
     },
     {
       id: "temperature",
@@ -375,7 +405,8 @@ export function LeadsTable({
       totalCount={total}
       getRowId={(row) => row.id}
       persistColumnsInUrl
-      initiallyHiddenColumns={["location", "temperature"]}
+      // What a salesperson scans for fits a laptop screen; the rest is one click away under "Columns".
+      initiallyHiddenColumns={["source", "temperature", "location", "lastActivityAt", "createdAt"]}
       enableRowSelection={canBulkStatus || canExport || bulkActions.length > 0}
       bulkActions={(selected, clear) => (
         <>

@@ -8,6 +8,7 @@ import {
   CircleSlash,
   Loader2,
   MapPinned,
+  MoreHorizontal,
   ThumbsUp,
   Trophy,
   UserX,
@@ -29,6 +30,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -82,7 +90,7 @@ const fieldErrors = (result: { serverError?: unknown } | undefined) =>
   );
 
 /**
- * Confirm / Done / No-show / Move / Cancel for an open visit (M08-04). "Done" records the outcome, the customer's
+ * "Done" plus a menu with Confirm / No-show / Move / Cancel for an open visit (M08-04). "Done" records the outcome, the customer's
  * feedback and who went, then offers the next step the outcome suggests (revisit, follow-up, booking, close).
  */
 export function VisitActions({
@@ -217,38 +225,42 @@ export function VisitActions({
 
   return (
     <>
-      <div className="flex flex-wrap gap-1">
-        {visit.status === "SCHEDULED" && !started ? (
-          <Button
-            size="sm"
-            variant="ghost"
-            className="h-7 px-2"
-            disabled={busy}
-            title="The customer confirmed they are coming"
-            onClick={() => void confirm()}
-          >
-            <ThumbsUp /> Confirm
-            <span className="sr-only">: {who}</span>
-          </Button>
-        ) : null}
-        <Button size="sm" variant="outline" className="h-7 px-2" onClick={() => openAs("done")}>
+      <div className="flex items-center justify-end gap-1">
+        <Button size="sm" variant="outline" className="h-8" onClick={() => openAs("done")}>
           <Check /> Done
           <span className="sr-only">: {who}</span>
         </Button>
-        {started ? (
-          <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => openAs("no-show")}>
-            <UserX /> No-show
-            <span className="sr-only">: {who}</span>
-          </Button>
-        ) : null}
-        <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => openAs("move")}>
-          <CalendarClock /> Move
-          <span className="sr-only">: {who}</span>
-        </Button>
-        <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => openAs("cancel")}>
-          <Ban /> Cancel
-          <span className="sr-only">: {who}</span>
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              size="icon-sm"
+              variant="ghost"
+              disabled={busy}
+              aria-label={`Visit options: ${who}`}
+            >
+              <MoreHorizontal />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            {visit.status === "SCHEDULED" && !started ? (
+              <DropdownMenuItem onSelect={() => void confirm()}>
+                <ThumbsUp /> Customer confirmed
+              </DropdownMenuItem>
+            ) : null}
+            {started ? (
+              <DropdownMenuItem onSelect={() => openAs("no-show")}>
+                <UserX /> Did not come (no-show)
+              </DropdownMenuItem>
+            ) : null}
+            <DropdownMenuItem onSelect={() => openAs("move")}>
+              <CalendarClock /> Move to another time
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem variant="destructive" onSelect={() => openAs("cancel")}>
+              <Ban /> Cancel visit
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       <Dialog open={mode !== null} onOpenChange={(open) => (!open && !busy ? close() : undefined)}>
         <DialogContent className="max-h-[92svh] overflow-y-auto sm:max-w-lg">

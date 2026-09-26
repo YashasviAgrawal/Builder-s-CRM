@@ -795,6 +795,8 @@ export async function getLead(ctx: ServiceContext, leadId: string) {
     lastActivityAt: lead.lastActivityAt.toISOString(),
     nextFollowUpAt: lead.nextFollowUpAt?.toISOString() ?? null,
     lastContactedAt: lead.lastContactedAt?.toISOString() ?? null,
+    lastCallAt: lead.lastCallAt?.toISOString() ?? null,
+    callAttempts: lead.callAttempts,
     firstVisitAt: lead.firstVisitAt?.toISOString() ?? null,
     bookedAt: lead.bookedAt?.toISOString() ?? null,
     closedAt: lead.closedAt?.toISOString() ?? null,
@@ -994,42 +996,98 @@ export async function listLeads(
       orderBy,
       skip: query.skip,
       take: query.take,
-      include: {
-        status: { select: { id: true, key: true, label: true, color: true, category: true } },
-        owner: { select: { user: { select: { name: true } } } },
-        source: { select: { name: true } },
-        interests: {
-          orderBy: { createdAt: "asc" },
-          select: { project: { select: { name: true } } },
-        },
-      },
+      include: LEAD_ROW_INCLUDE,
     }),
     ctx.db.lead.count({ where }),
   ]);
+  return { total, rows: leads.map(toLeadRow) };
+}
+
+/** Relations a list row needs (lists, exports and the pipeline board). */
+const LEAD_ROW_INCLUDE = {
+  status: { select: { id: true, key: true, label: true, color: true, category: true } },
+  owner: { select: { user: { select: { name: true } } } },
+  source: { select: { name: true } },
+  interests: {
+    orderBy: { createdAt: "asc" },
+    select: { project: { select: { name: true } } },
+  },
+} satisfies Prisma.LeadInclude;
+
+function toLeadRow(lead: Prisma.LeadGetPayload<{ include: typeof LEAD_ROW_INCLUDE }>): LeadRow {
   return {
-    total,
-    rows: leads.map((lead) => ({
-      id: lead.id,
-      number: lead.number,
-      name: lead.name,
-      mobile: lead.mobile,
-      email: lead.email,
-      location: [lead.locality, lead.city].filter(Boolean).join(", ") || null,
-      status: lead.status,
-      ownerName: lead.owner?.user.name ?? null,
-      sourceName: lead.source?.name ?? null,
-      projects: lead.interests.map((interest) => interest.project.name),
-      budgetMin: lead.budgetMin?.toString() ?? null,
-      budgetMax: lead.budgetMax?.toString() ?? null,
-      temperature: lead.temperature,
-      tags: lead.tags,
-      duplicateStatus: lead.duplicateStatus,
-      lastActivityAt: lead.lastActivityAt.toISOString(),
-      nextFollowUpAt: lead.nextFollowUpAt?.toISOString() ?? null,
-      lastContactedAt: lead.lastContactedAt?.toISOString() ?? null,
-      createdAt: lead.createdAt.toISOString(),
-    })),
+    id: lead.id,
+    number: lead.number,
+    name: lead.name,
+    mobile: lead.mobile,
+    email: lead.email,
+    location: [lead.locality, lead.city].filter(Boolean).join(", ") || null,
+    status: lead.status,
+    ownerName: lead.owner?.user.name ?? null,
+    sourceName: lead.source?.name ?? null,
+    projects: lead.interests.map((interest) => interest.project.name),
+    budgetMin: lead.budgetMin?.toString() ?? null,
+    budgetMax: lead.budgetMax?.toString() ?? null,
+    temperature: lead.temperature,
+    tags: lead.tags,
+    duplicateStatus: lead.duplicateStatus,
+    lastActivityAt: lead.lastActivityAt.toISOString(),
+    nextFollowUpAt: lead.nextFollowUpAt?.toISOString() ?? null,
+    lastContactedAt: lead.lastContactedAt?.toISOString() ?? null,
+    createdAt: lead.createdAt.toISOString(),
   };
+}
+
+// --- Pipeline board ----------------------------------------------------------------------------------------------
+
+export interface LeadBoardColumn {
+  status: { id: string; key: string; label: string; color: string; category: string };
+  /** All leads in this status that match the board's filters. */
+  total: number;
+  /** The most recently active ones, up to the column limit. */
+  rows: LeadRow[];
+}
+
+/**
+ * The pipeline board (lead list as columns): one column per active status in their configured order, with the same
+ * scope, view, filters and search as the list. Lost / not interested columns are shown on request; invalid leads
+ * never are.
+ */
+export async function listLeadBoard(
+  ctx: ServiceContext,
+  query: Pick<TableQuery, "q">,
+  filters: LeadFilters,
+  options: { includeClosed?: boolean; perColumn?: number } = {},
+): Promise<LeadBoardColumn[]> {
+  ctx.permissions.assert(LEAD_PERMISSIONS.view);
+  const perColumn = Math.min(Math.max(options.perColumn ?? 25, 1), 100);
+  const where = await buildLeadWhere(ctx, query, filters);
+  const [statuses, counts] = await Promise.all([
+    ctx.db.leadStatus.findMany({
+      where: {
+        isActive: true,
+        category: { notIn: options.includeClosed ? ["INVALID"] : ["LOST", "INVALID"] },
+      },
+      orderBy: [{ sortOrder: "asc" }, { label: "asc" }],
+      select: { id: true, key: true, label: true, color: true, category: true },
+    }),
+    ctx.db.lead.groupBy({ by: ["statusId"], where, _count: { _all: true } }),
+  ]);
+  const totals = new Map(counts.map((count) => [count.statusId, count._count._all]));
+  return Promise.all(
+    statuses.map(async (status) => {
+      const total = totals.get(status.id) ?? 0;
+      const leads = total
+        ? await ctx.db.lead.findMany({
+            where: { AND: [where, { statusId: status.id }] },
+            orderBy: [{ lastActivityAt: "desc" }, { number: "desc" }],
+            take: perColumn,
+            include: LEAD_ROW_INCLUDE,
+          })
+        : [];
+      return { status, total, rows: leads.map(toLeadRow) };
+    }),
+  );
 }
 
 /** Owners and managers the actor may filter by (their scope), plus the views available to them. */

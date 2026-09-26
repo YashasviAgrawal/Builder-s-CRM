@@ -14,6 +14,7 @@ export const assignmentUiModule: UiModule = {
       {
         key: "assignment.assign",
         order: 10,
+        placement: "secondary",
         render: ({ lead }) => <LeadAssignAction lead={lead} />,
       },
     ],

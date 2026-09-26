@@ -31,6 +31,7 @@ export const activitiesManifest: ModuleManifest = {
     },
     {
       key: "activities.team-follow-ups",
+      parent: "identity.team",
       label: "Team follow-ups",
       href: "/team/follow-ups",
       icon: ListTodo,

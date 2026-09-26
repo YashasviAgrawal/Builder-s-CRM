@@ -1,3 +1,6 @@
+import { UserRoundPen } from "lucide-react";
+
+import { TooltipIconButton } from "@/components/shared/tooltip-icon-button";
 import type { LeadActionTarget } from "@/modules/leads";
 import { isWithinScope } from "@/platform/rbac/scope";
 import { getRequestContext } from "@/platform/tenant/request-context";
@@ -6,7 +9,7 @@ import { ASSIGNMENT_PERMISSIONS } from "../permissions";
 import { assignmentScope } from "../server/core";
 import { AssignDialog } from "./assign-dialog";
 
-/** "Assign" / "Reassign" in the lead page header, for people allowed to change this lead's owner (M05-04). */
+/** "Assign" / "Reassign" (a compact utility) in the lead page's action bar, for people allowed to change this lead's owner (M05-04). */
 export async function LeadAssignAction({ lead }: { lead: LeadActionTarget }) {
   const ctx = await getRequestContext();
   const scope = await assignmentScope(
@@ -18,6 +21,11 @@ export async function LeadAssignAction({ lead }: { lead: LeadActionTarget }) {
   return (
     <AssignDialog
       lead={{ id: lead.id, number: lead.number, ownerId: lead.ownerId, ownerName: lead.ownerName }}
+      trigger={
+        <TooltipIconButton label={lead.ownerId ? "Reassign" : "Assign"} variant="outline">
+          <UserRoundPen />
+        </TooltipIconButton>
+      }
     />
   );
 }

@@ -28,6 +28,7 @@ export const billingManifest: ModuleManifest = {
     },
     {
       key: "billing.deals",
+      parent: "billing.home",
       label: "Deal financials",
       href: "/billing/deals",
       icon: FileText,
@@ -37,6 +38,7 @@ export const billingManifest: ModuleManifest = {
     },
     {
       key: "billing.profit-loss",
+      parent: "analytics.reports",
       label: "Profit & loss",
       href: "/reports/profit-loss",
       icon: ChartNoAxesCombined,
@@ -46,6 +48,7 @@ export const billingManifest: ModuleManifest = {
     },
     {
       key: "billing.lost",
+      parent: "analytics.reports",
       label: "Lost opportunities",
       href: "/reports/lost-opportunities",
       icon: TrendingDown,

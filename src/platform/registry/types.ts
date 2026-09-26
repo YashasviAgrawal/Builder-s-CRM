@@ -20,6 +20,11 @@ export interface NavItem {
   permission?: string;
   /** Extra route prefixes that should highlight this item. */
   match?: readonly string[];
+  /**
+   * Key of the item this one belongs under (e.g. "Unassigned" under "Leads"). Sub-items unfold beneath their parent
+   * while its area is open; when the parent is not available to the user, the item shows at the top level.
+   */
+  parent?: string;
 }
 
 export type SettingsGroup =
