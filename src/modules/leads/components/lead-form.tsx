@@ -9,6 +9,7 @@ import { type ReactNode, useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
+import { usePermissions } from "@/components/shared/permissions";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { TagInput } from "@/components/shared/tag-input";
 import { Button } from "@/components/ui/button";
@@ -36,8 +37,10 @@ import { applyActionErrors } from "@/lib/action-result";
 
 import { checkDuplicatesAction, createLeadAction, updateLeadAction } from "../actions";
 import { BUYING_TIMELINES, INTEREST_LEVELS, PURPOSES, TEMPERATURES } from "../constants";
+import { LEAD_PERMISSIONS } from "../permissions";
 import { type CreateLeadInput, createLeadSchema, type CreateLeadValues } from "../schemas";
 import type { DuplicateMatch, LeadDetail } from "../server/leads";
+import { CampaignField, type CampaignOption } from "./campaign-field";
 
 const NONE = "__none__";
 
@@ -127,8 +130,14 @@ export function LeadForm({
   const sourceId = useWatch({ control: form.control, name: "sourceId" });
   const chosenProjects = useWatch({ control: form.control, name: "interests" }) ?? [];
   const [projectToAdd, setProjectToAdd] = useState<string>("");
+  const [addedCampaigns, setAddedCampaigns] = useState<CampaignOption[]>([]);
+  const canAddCampaigns = usePermissions().can(LEAD_PERMISSIONS.mastersManage);
+  const allCampaigns = [
+    ...options.campaigns,
+    ...addedCampaigns.filter((added) => !options.campaigns.some((entry) => entry.id === added.id)),
+  ];
 
-  const campaigns = options.campaigns.filter(
+  const campaigns = allCampaigns.filter(
     (campaign) => !campaign.sourceId || !sourceId || campaign.sourceId === sourceId,
   );
 
@@ -354,7 +363,7 @@ export function LeadForm({
                   value={String(field.value || NONE)}
                   onValueChange={(value) => {
                     field.onChange(value === NONE ? "" : value);
-                    const campaign = options.campaigns.find(
+                    const campaign = allCampaigns.find(
                       (entry) => entry.id === form.getValues("campaignId"),
                     );
                     if (campaign?.sourceId && campaign.sourceId !== value)
@@ -379,12 +388,27 @@ export function LeadForm({
               </FormItem>
             )}
           />
-          {select(
-            "campaignId",
-            "Campaign",
-            campaigns.map((campaign) => ({ value: campaign.id, label: campaign.name })),
-            "No campaign",
-          )}
+          <FormField
+            control={form.control}
+            name="campaignId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Campaign</FormLabel>
+                <FormControl>
+                  <CampaignField
+                    value={String(field.value ?? "")}
+                    onChange={(campaignId) => field.onChange(campaignId)}
+                    onBlur={field.onBlur}
+                    campaigns={campaigns}
+                    sourceId={String(sourceId ?? "")}
+                    canCreate={canAddCampaigns}
+                    onCreated={(campaign) => setAddedCampaigns((current) => [...current, campaign])}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           {text(
             "subSource",
             "Source detail",
@@ -596,7 +620,7 @@ export function LeadForm({
           </Card>
         ) : null}
 
-        <div className="sticky bottom-0 -mx-1 flex justify-end gap-2 border-t bg-background/95 px-1 py-3 backdrop-blur">
+        <div className="sticky bottom-0 z-10 -mx-1 flex justify-end gap-2 border-t bg-background/95 px-1 py-3 backdrop-blur">
           <Button type="button" variant="ghost" onClick={() => router.back()}>
             Cancel
           </Button>

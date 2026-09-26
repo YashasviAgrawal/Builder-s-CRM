@@ -66,13 +66,15 @@ export function NavLinks({
   );
 
   return (
-    <nav aria-label="Main" className="flex flex-col gap-4">
+    <nav aria-label="Main" className="flex flex-col gap-5">
       {groups.map((group) => (
-        <div key={group.section} className="flex flex-col gap-1">
+        <div key={group.section} className="flex flex-col gap-0.5">
           {SECTION_LABELS[group.section] && !collapsed ? (
-            <p className="px-3 pb-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+            <p className="px-3 pb-1.5 text-[11px] font-semibold tracking-[0.12em] text-sidebar-foreground/65 uppercase">
               {SECTION_LABELS[group.section]}
             </p>
+          ) : SECTION_LABELS[group.section] ? (
+            <span aria-hidden className="mx-auto mb-1.5 h-px w-6 bg-sidebar-border" />
           ) : null}
           {group.items.map((item) => {
             const active = item.key === activeKey;
@@ -84,12 +86,25 @@ export function NavLinks({
                 onClick={onNavigate}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex h-9 items-center gap-3 rounded-md px-3 text-sm font-medium text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                  active && "bg-sidebar-accent text-sidebar-accent-foreground",
+                  "group/nav relative flex h-9 items-center gap-3 rounded-md px-3 text-[13.5px] font-medium text-sidebar-foreground/85 transition-colors outline-none hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-[3px] focus-visible:ring-sidebar-ring/50",
+                  active && "bg-sidebar-active text-white hover:bg-sidebar-active",
                   collapsed && "justify-center px-0",
                 )}
               >
-                <Icon className={cn("size-4 shrink-0", active && "text-sidebar-primary")} />
+                {active ? (
+                  <span
+                    aria-hidden
+                    className="absolute top-1/2 -left-3 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-sidebar-primary"
+                  />
+                ) : null}
+                <Icon
+                  className={cn(
+                    "size-[18px] shrink-0 transition-colors",
+                    active
+                      ? "text-sidebar-primary"
+                      : "text-sidebar-foreground/60 group-hover/nav:text-sidebar-accent-foreground",
+                  )}
+                />
                 {collapsed ? (
                   <span className="sr-only">{item.label}</span>
                 ) : (

@@ -33,7 +33,7 @@ export function SummaryTable<Row extends { key: string }>({
   empty?: string;
 }) {
   return (
-    <div className="rounded-lg border">
+    <div className="overflow-hidden rounded-xl border bg-card shadow-card">
       <Table>
         <caption className="sr-only">{caption}</caption>
         <TableHeader>

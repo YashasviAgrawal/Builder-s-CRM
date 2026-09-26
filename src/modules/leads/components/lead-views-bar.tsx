@@ -88,7 +88,7 @@ export function LeadViewsBar({
     <div className="flex flex-wrap items-center justify-between gap-2">
       <nav
         aria-label="Lead views"
-        className="inline-flex max-w-full overflow-x-auto rounded-lg bg-muted p-1"
+        className="scrollbar-none inline-flex max-w-full overflow-x-auto rounded-lg border border-border/70 bg-secondary/60 p-[3px]"
       >
         {views.map((view) => (
           <Link
@@ -97,7 +97,7 @@ export function LeadViewsBar({
             aria-current={view === current ? "page" : undefined}
             className={cn(
               "rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground",
-              view === current && "bg-background text-foreground shadow-sm",
+              view === current && "bg-card text-foreground shadow-card ring-1 ring-border/50",
             )}
           >
             {VIEW_LABELS[view]}

@@ -121,7 +121,7 @@ export function IntakeApiDocs({
 
         <section className="space-y-2">
           <h3 className="font-semibold">Fields</h3>
-          <div className="overflow-x-auto rounded-lg border">
+          <div className="overflow-x-auto rounded-xl border bg-card shadow-card">
             <Table>
               <TableHeader>
                 <TableRow>

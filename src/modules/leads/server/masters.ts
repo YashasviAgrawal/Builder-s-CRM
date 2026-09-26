@@ -306,6 +306,51 @@ export async function saveCampaign(
   });
 }
 
+/** A campaign code from its name: "Diwali Expo 2026" → "diwali-expo-2026" (fits the code rules, ≤ 36 chars). */
+export function campaignCodeFromName(name: string): string {
+  const base = name
+    .normalize("NFKD")
+    .replace(/\p{M}/gu, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 36)
+    .replace(/-+$/, "");
+  return base.length >= 2 ? base : "campaign";
+}
+
+/**
+ * Adds a campaign by name while capturing a lead (lead form): an active campaign with the same name (any case) is
+ * reused; otherwise one is created under the lead's source with a code derived from the name, numbered when taken.
+ * Goes through `saveCampaign`, so validation, permission and audit are the same as in Settings.
+ */
+export async function quickAddCampaign(
+  ctx: ServiceContext,
+  input: { name: string; sourceId?: string | null },
+): Promise<{ id: string; name: string; sourceId: string | null; created: boolean }> {
+  ctx.permissions.assert(LEAD_PERMISSIONS.mastersManage);
+  const name = input.name.trim().replace(/\s+/g, " ");
+  const existing = await ctx.db.campaign.findFirst({
+    where: { name: { equals: name, mode: "insensitive" }, isActive: true },
+    select: { id: true, name: true, sourceId: true },
+  });
+  if (existing) return { ...existing, created: false };
+  const base = campaignCodeFromName(name);
+  const taken = new Set(
+    (
+      await ctx.db.campaign.findMany({
+        where: { code: { startsWith: base } },
+        select: { code: true },
+      })
+    ).map((campaign) => campaign.code),
+  );
+  let code = base;
+  for (let suffix = 2; taken.has(code); suffix++) code = `${base}-${suffix}`;
+  const sourceId = input.sourceId || null;
+  const { id } = await saveCampaign(ctx, null, { name, code, sourceId, isActive: true });
+  return { id, name, sourceId, created: true };
+}
+
 export async function deleteCampaign(ctx: ServiceContext, campaignId: string) {
   ctx.permissions.assert(LEAD_PERMISSIONS.mastersManage);
   await ctx.db.$transaction(async (tx) => {

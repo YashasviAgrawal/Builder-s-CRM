@@ -38,7 +38,7 @@ export default async function RolesPage() {
           <CreateRoleDialog roles={roles.map((role) => ({ id: role.id, name: role.name }))} />
         }
       />
-      <div className="overflow-hidden rounded-lg border">
+      <div className="overflow-hidden rounded-xl border bg-card shadow-card">
         <Table>
           <TableHeader className="bg-muted/40">
             <TableRow className="hover:bg-transparent">

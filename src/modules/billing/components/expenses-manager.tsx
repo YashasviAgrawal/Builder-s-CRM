@@ -142,7 +142,7 @@ export function ExpensesManager({
           </Button>
         </div>
       ) : null}
-      <div className="rounded-lg border">
+      <div className="overflow-hidden rounded-xl border bg-card shadow-card">
         <Table>
           <TableHeader>
             <TableRow>

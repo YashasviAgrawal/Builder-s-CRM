@@ -16,7 +16,7 @@ export function UrlTabs({
   const current = tabs.some((item) => item.value === tab) ? tab : first;
   return (
     <Tabs value={current} onValueChange={(value) => void setTab(value === first ? null : value)}>
-      <TabsList className="mb-4 max-w-full overflow-x-auto">
+      <TabsList variant="line" className="mb-5 max-w-full">
         {tabs.map((item) => (
           <TabsTrigger key={item.value} value={item.value}>
             {item.label}

@@ -19,7 +19,7 @@ export function SettingsNav({ permissions }: { permissions: readonly string[] })
     >
       {groups.map((group) => (
         <div key={group.group} className="flex shrink-0 flex-col gap-1">
-          <p className="px-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+          <p className="px-3 pb-1 text-[11px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
             {group.group}
           </p>
           {group.sections.map((section) => {
@@ -31,11 +31,11 @@ export function SettingsNav({ permissions }: { permissions: readonly string[] })
                 href={section.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex items-center gap-2 rounded-md px-2 py-1.5 text-sm whitespace-nowrap text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
-                  active && "bg-accent font-medium text-accent-foreground",
+                  "flex items-center gap-2.5 rounded-md px-3 py-2 text-sm whitespace-nowrap text-muted-foreground transition-colors hover:bg-card hover:text-foreground",
+                  active && "bg-card font-medium text-foreground shadow-card ring-1 ring-border",
                 )}
               >
-                <Icon className="size-4" />
+                <Icon className={cn("size-4", active && "text-primary")} />
                 {section.label}
               </Link>
             );

@@ -303,7 +303,7 @@ export function ImportWizard({
               </Button>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto rounded-lg border">
+              <div className="overflow-x-auto rounded-xl border bg-card shadow-card">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -476,7 +476,7 @@ export function ImportWizard({
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="overflow-x-auto rounded-lg border">
+                <div className="overflow-x-auto rounded-xl border bg-card shadow-card">
                   <Table>
                     <TableHeader>
                       <TableRow>

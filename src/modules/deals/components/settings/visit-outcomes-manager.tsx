@@ -89,7 +89,7 @@ export function VisitOutcomesManager({ outcomes }: { outcomes: VisitOutcomeRow[]
           <Plus /> Add outcome
         </Button>
       </div>
-      <div className="rounded-lg border">
+      <div className="overflow-hidden rounded-xl border bg-card shadow-card">
         <Table>
           <TableHeader>
             <TableRow>

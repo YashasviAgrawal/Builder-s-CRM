@@ -101,7 +101,7 @@ export function SourcesTable({ sources }: { sources: SourceRow[] }) {
           <Plus /> Add source
         </Button>
       </div>
-      <div className="overflow-hidden rounded-lg border">
+      <div className="overflow-hidden rounded-xl border bg-card shadow-card">
         <Table>
           <TableHeader className="bg-muted/40">
             <TableRow className="hover:bg-transparent">

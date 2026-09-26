@@ -124,7 +124,7 @@ export function ApiKeysManager({
           description="Create a key for each website form or portal that should send leads to the CRM."
         />
       ) : (
-        <div className="overflow-x-auto rounded-lg border">
+        <div className="overflow-x-auto rounded-xl border bg-card shadow-card">
           <Table>
             <TableHeader>
               <TableRow>

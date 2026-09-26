@@ -22,7 +22,7 @@ export function BillingNav({ billing, finance }: { billing: boolean; finance: bo
   return (
     <nav
       aria-label="Billing"
-      className="mb-6 inline-flex max-w-full overflow-x-auto rounded-lg bg-muted p-1"
+      className="mb-6 scrollbar-none inline-flex max-w-full overflow-x-auto rounded-lg border border-border/70 bg-secondary/60 p-[3px]"
     >
       {tabs.map((tab) => (
         <Link
@@ -31,7 +31,7 @@ export function BillingNav({ billing, finance }: { billing: boolean; finance: bo
           aria-current={active(tab.href) ? "page" : undefined}
           className={cn(
             "rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground",
-            active(tab.href) && "bg-background text-foreground shadow-sm",
+            active(tab.href) && "bg-card text-foreground shadow-card ring-1 ring-border/50",
           )}
         >
           {tab.label}

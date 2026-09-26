@@ -21,7 +21,9 @@ export default async function SettingsIndexPage() {
       <div className="space-y-8">
         {groups.map((group) => (
           <section key={group.group} className="space-y-3">
-            <h2 className="text-sm font-medium text-muted-foreground">{group.group}</h2>
+            <h2 className="text-[11px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+              {group.group}
+            </h2>
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {group.sections.map((section) => {
                 const Icon = section.icon;
@@ -31,10 +33,10 @@ export default async function SettingsIndexPage() {
                     href={section.href}
                     className="group rounded-xl focus-visible:outline-none"
                   >
-                    <Card className="h-full transition-colors group-hover:border-primary/40 group-focus-visible:ring-[3px] group-focus-visible:ring-ring/50">
+                    <Card className="h-full transition-[box-shadow,transform,border-color] duration-200 group-hover:-translate-y-0.5 group-hover:border-primary/25 group-hover:shadow-raised group-focus-visible:ring-[3px] group-focus-visible:ring-ring/40">
                       <CardHeader>
-                        <div className="mb-2 flex size-9 items-center justify-center rounded-md bg-primary/10 text-primary">
-                          <Icon className="size-4" />
+                        <div className="mb-3 flex size-10 items-center justify-center rounded-lg bg-accent text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                          <Icon className="size-[18px]" />
                         </div>
                         <CardTitle>{section.label}</CardTitle>
                         <CardDescription>{section.description}</CardDescription>

@@ -10,8 +10,9 @@ import { cn } from "@/lib/utils";
 import { DashboardView } from "@/modules/analytics/components/dashboard-view";
 import { PeriodFilters } from "@/modules/analytics/components/period-filters";
 import { loadDashboard } from "@/modules/analytics/server/dashboard";
+import { getRegionalSettings } from "@/modules/organization";
 import { uiRegistry } from "@/modules/registry.ui";
-import { getRequestContext } from "@/platform/tenant/request-context";
+import { getCurrentUser, getRequestContext } from "@/platform/tenant/request-context";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -31,6 +32,22 @@ const TITLES = {
   TEAM: { title: "Team dashboard", description: "Your team's work, pipeline and results." },
   ALL: { title: "Dashboard", description: "The organization at a glance." },
 } as const;
+
+/** "Good morning, Asha · Saturday, 26 September" in the organization's time zone. */
+function greeting(name: string, timeZone: string, locale: string, now = new Date()): string {
+  const hour = Number(
+    new Intl.DateTimeFormat("en-GB", { hour: "numeric", hourCycle: "h23", timeZone }).format(now),
+  );
+  const part = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  const day = new Intl.DateTimeFormat(locale, {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    timeZone,
+  }).format(now);
+  const firstName = name.trim().split(/\s+/)[0];
+  return `${part}${firstName ? `, ${firstName}` : ""} · ${day}`;
+}
 
 /** Role-adaptive dashboard (M10-04 → M10-06): My Day, team or organization, by the viewer's report scope. */
 export default async function DashboardPage({ searchParams }: PageProps<"/dashboard">) {
@@ -71,9 +88,14 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
       })),
   );
   const { title, description } = TITLES[data.view];
+  const [user, regional] = await Promise.all([getCurrentUser(), getRegionalSettings(ctx)]);
   return (
     <>
-      <PageHeader title={title} description={description} />
+      <PageHeader
+        eyebrow={greeting(user.name, regional.timezone, regional.locale)}
+        title={title}
+        description={description}
+      />
       <PeriodFilters
         preset={data.period.preset}
         range={data.period.range}

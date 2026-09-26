@@ -38,7 +38,7 @@ export function ReportTable({
     return String(value);
   };
   return (
-    <div className="overflow-x-auto rounded-lg border">
+    <div className="overflow-x-auto rounded-xl border bg-card shadow-card">
       <Table>
         <caption className="sr-only">{report.title}</caption>
         <TableHeader>

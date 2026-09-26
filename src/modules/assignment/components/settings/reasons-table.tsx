@@ -68,7 +68,7 @@ export function ReasonsTable({ reasons }: { reasons: ReasonRow[] }) {
           <Plus /> Add reason
         </Button>
       </div>
-      <div className="overflow-x-auto rounded-lg border">
+      <div className="overflow-x-auto rounded-xl border bg-card shadow-card">
         <Table>
           <TableHeader>
             <TableRow>

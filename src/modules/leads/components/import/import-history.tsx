@@ -27,7 +27,7 @@ export function ImportHistory({ batches }: { batches: ImportBatchRow[] }) {
     );
   }
   return (
-    <div className="overflow-x-auto rounded-lg border">
+    <div className="overflow-x-auto rounded-xl border bg-card shadow-card">
       <Table>
         <TableHeader>
           <TableRow>

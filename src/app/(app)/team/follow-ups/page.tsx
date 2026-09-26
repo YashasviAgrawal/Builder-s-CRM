@@ -87,7 +87,7 @@ export default async function TeamFollowUpsPage({ searchParams }: PageProps<"/te
           description="People in your team appear here."
         />
       ) : (
-        <div className="rounded-lg border">
+        <div className="overflow-hidden rounded-xl border bg-card shadow-card">
           <Table aria-label="Follow-ups per person">
             <TableHeader>
               <TableRow>

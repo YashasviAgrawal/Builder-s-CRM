@@ -165,7 +165,7 @@ export function DataTable<TData>({
     <div className={cn("flex flex-col gap-3", className)}>
       {toolbar ? toolbar(table) : null}
       {bulkActions && table.getSelectedRowModel().rows.length > 0 ? (
-        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-sm">
+        <div className="flex flex-wrap items-center gap-2 rounded-xl border border-primary/15 bg-accent px-4 py-2 text-sm">
           <span className="font-medium">{table.getSelectedRowModel().rows.length} selected</span>
           {bulkActions(
             table.getSelectedRowModel().rows.map((row) => row.original),
@@ -175,17 +175,17 @@ export function DataTable<TData>({
       ) : null}
       <div
         className={cn(
-          "overflow-hidden rounded-lg border transition-opacity",
+          "overflow-hidden rounded-xl border bg-card shadow-card transition-opacity",
           isPending && "opacity-60",
         )}
         aria-busy={isPending}
       >
         <Table>
-          <TableHeader className="bg-muted/40">
+          <TableHeader className="bg-secondary/45">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="hover:bg-transparent">
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} className="px-3">
+                  <TableHead key={header.id} className="px-4 first:pl-5 last:pr-5">
                     {header.isPlaceholder
                       ? null
                       : flexRender(header.column.columnDef.header, header.getContext())}
@@ -199,7 +199,7 @@ export function DataTable<TData>({
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id} data-state={row.getIsSelected() ? "selected" : undefined}>
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="px-3 py-2.5">
+                    <TableCell key={cell.id} className="px-4 py-3 first:pl-5 last:pr-5">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
@@ -209,7 +209,7 @@ export function DataTable<TData>({
               <TableRow className="hover:bg-transparent">
                 <TableCell colSpan={table.getVisibleLeafColumns().length} className="p-0">
                   {emptyState ?? (
-                    <p className="py-12 text-center text-sm text-muted-foreground">No results.</p>
+                    <p className="py-14 text-center text-sm text-muted-foreground">No results.</p>
                   )}
                 </TableCell>
               </TableRow>

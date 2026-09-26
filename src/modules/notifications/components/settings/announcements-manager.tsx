@@ -237,7 +237,7 @@ export function AnnouncementsManager({
           description="Share news with everyone, some roles or a manager's team. It shows as a banner and a notification."
         />
       ) : (
-        <div className="rounded-lg border">
+        <div className="overflow-hidden rounded-xl border bg-card shadow-card">
           <Table>
             <TableHeader>
               <TableRow>

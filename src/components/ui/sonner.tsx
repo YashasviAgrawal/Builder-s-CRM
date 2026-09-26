@@ -8,7 +8,7 @@ function Toaster(props: ToasterProps) {
   return (
     <Sonner
       theme={theme as ToasterProps["theme"]}
-      className="toaster group"
+      className="toaster group font-sans"
       richColors
       closeButton
       style={
@@ -16,6 +16,7 @@ function Toaster(props: ToasterProps) {
           "--normal-bg": "var(--popover)",
           "--normal-text": "var(--popover-foreground)",
           "--normal-border": "var(--border)",
+          "--border-radius": "0.75rem",
         } as React.CSSProperties
       }
       {...props}

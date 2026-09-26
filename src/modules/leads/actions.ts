@@ -265,6 +265,21 @@ export const saveCampaignAction = tenantAction
     return result;
   });
 
+/** "Add as a new campaign" from the lead form: reuses a campaign of the same name or creates it. */
+export const quickAddCampaignAction = tenantAction
+  .metadata({ name: "leads.quickAddCampaign", permission: LEAD_PERMISSIONS.mastersManage })
+  .inputSchema(
+    z.object({
+      name: z.string().trim().min(2, "Enter at least 2 characters").max(80),
+      sourceId: z.uuid().nullable().optional(),
+    }),
+  )
+  .action(async ({ parsedInput, ctx }) => {
+    const result = await masters.quickAddCampaign(ctx.service, parsedInput);
+    if (result.created) revalidatePath("/settings/leads", "layout");
+    return result;
+  });
+
 export const deleteCampaignAction = tenantAction
   .metadata({ name: "leads.deleteCampaign", permission: LEAD_PERMISSIONS.mastersManage })
   .inputSchema(z.object({ campaignId: z.uuid() }))

@@ -190,7 +190,7 @@ export function PermissionMatrix({
         </Card>
       ))}
       {!locked ? (
-        <div className="sticky bottom-0 -mx-1 flex items-center justify-end gap-2 border-t bg-background/95 px-1 py-3 backdrop-blur">
+        <div className="sticky bottom-0 z-10 -mx-1 flex items-center justify-end gap-2 border-t bg-background/95 px-1 py-3 backdrop-blur">
           {dirty ? (
             <span className="mr-auto text-sm text-muted-foreground">You have unsaved changes</span>
           ) : null}

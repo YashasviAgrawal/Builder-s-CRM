@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { ArrowRight, Lock, Mail } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -8,7 +9,6 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { SubmitButton } from "@/components/shared/submit-button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -18,7 +18,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { authClient, authErrorMessage } from "@/lib/auth-client";
+
+import { AuthHeading, authInputClass, AuthNotice, FieldIcon } from "./auth-ui";
 
 const loginSchema = z.object({
   email: z.email("Enter a valid e-mail address"),
@@ -60,69 +63,95 @@ export function LoginForm({ next, notice }: { next: string | null; notice: strin
   const noticeText = notice ? NOTICES[notice] : null;
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-xl">Sign in</CardTitle>
-        <CardDescription>
-          Use the e-mail address your administrator registered for you.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={onSubmit} className="grid gap-4" noValidate>
-            {noticeText ? (
-              <p role="status" className="rounded-md border bg-muted/50 px-3 py-2 text-sm">
-                {noticeText}
-              </p>
-            ) : null}
-            {error ? (
-              <p
-                role="alert"
-                className="rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm text-destructive"
-              >
-                {error}
-              </p>
-            ) : null}
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>E-mail</FormLabel>
+    <div>
+      <AuthHeading
+        title="Welcome back"
+        description="Sign in with the e-mail address your administrator registered for you."
+      />
+      <Form {...form}>
+        <form onSubmit={onSubmit} className="grid gap-5" noValidate>
+          {noticeText ? (
+            <AuthNotice tone={notice === "inactive" ? "error" : "info"} role="status">
+              {noticeText}
+            </AuthNotice>
+          ) : null}
+          {error ? (
+            <AuthNotice tone="error" role="alert">
+              {error}
+            </AuthNotice>
+          ) : null}
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>E-mail</FormLabel>
+                <div className="relative">
+                  <FieldIcon icon={Mail} />
                   <FormControl>
-                    <Input type="email" autoComplete="username" autoFocus {...field} />
+                    <Input
+                      type="email"
+                      autoComplete="username"
+                      autoFocus
+                      placeholder="you@company.com"
+                      className={authInputClass}
+                      {...field}
+                    />
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <div className="flex items-center justify-between">
-                    <FormLabel>Password</FormLabel>
-                    <Link
-                      href="/forgot-password"
-                      className="text-sm text-primary underline-offset-4 hover:underline"
-                    >
-                      Forgot password?
-                    </Link>
-                  </div>
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <div className="flex items-center justify-between">
+                  <FormLabel>Password</FormLabel>
+                  <Link
+                    href="/forgot-password"
+                    className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
+                <div className="relative">
+                  <FieldIcon icon={Lock} />
                   <FormControl>
-                    <Input type="password" autoComplete="current-password" {...field} />
+                    <PasswordInput
+                      autoComplete="current-password"
+                      placeholder="Your password"
+                      className={authInputClass}
+                      {...field}
+                    />
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <SubmitButton pending={form.formState.isSubmitting} className="w-full">
-              Sign in
-            </SubmitButton>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <SubmitButton
+            pending={form.formState.isSubmitting}
+            size="lg"
+            className="group mt-1 h-11 w-full"
+          >
+            Sign in
+            {form.formState.isSubmitting ? null : (
+              <ArrowRight className="transition-transform group-hover:translate-x-0.5" />
+            )}
+          </SubmitButton>
+        </form>
+      </Form>
+      <div className="mt-8 flex items-center gap-3 text-xs text-muted-foreground">
+        <span className="h-px flex-1 bg-border" />
+        Access by invitation only
+        <span className="h-px flex-1 bg-border" />
+      </div>
+      <p className="mt-3 text-center text-sm text-muted-foreground">
+        Need an account? Ask your administrator to invite you.
+      </p>
+    </div>
   );
 }

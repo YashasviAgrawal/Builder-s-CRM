@@ -121,7 +121,7 @@ export function MasterTable({ kind, rows }: { kind: MasterKind; rows: MasterRow[
           <Plus /> Add {noun}
         </Button>
       </div>
-      <div className="overflow-hidden rounded-lg border">
+      <div className="overflow-hidden rounded-xl border bg-card shadow-card">
         <Table>
           <TableHeader className="bg-muted/40">
             <TableRow className="hover:bg-transparent">

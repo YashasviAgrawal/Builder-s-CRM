@@ -1,4 +1,4 @@
-import { AlertTriangle, Mail, MapPin, Phone } from "lucide-react";
+import { AlertTriangle, Hash, Mail, MapPin, Phone, Signpost, UserRound } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDate, formatDateTime, formatMoney } from "@/lib/format";
 import { formatPhone } from "@/lib/phone";
+import { initials } from "@/lib/utils";
 import { isLeadInScope, LEAD_PERMISSIONS } from "@/modules/leads";
 import { AttachmentsPanel } from "@/modules/leads/components/attachments-panel";
 import { LeadStatusBadge, TemperatureBadge } from "@/modules/leads/components/badges";
@@ -75,6 +76,14 @@ export default async function LeadPage({ params }: PageProps<"/leads/[id]">) {
   return (
     <>
       <PageHeader
+        leading={
+          <span
+            aria-hidden
+            className="flex size-14 items-center justify-center rounded-full bg-accent text-lg font-semibold text-primary ring-4 ring-card"
+          >
+            {initials(lead.name)}
+          </span>
+        }
         title={
           <span className="flex flex-wrap items-center gap-3">
             {lead.name}
@@ -87,7 +96,24 @@ export default async function LeadPage({ params }: PageProps<"/leads/[id]">) {
             <TemperatureBadge value={lead.temperature} />
           </span>
         }
-        description={`${lead.number} · ${lead.owner ? `Owner: ${lead.owner.name}` : "Unassigned"}${lead.source ? ` · ${lead.source.name}` : ""}`}
+        description={
+          <span className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+            <span className="inline-flex items-center gap-1.5 font-mono text-[13px]">
+              <Hash className="size-3.5" aria-hidden />
+              {lead.number}
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <UserRound className="size-3.5" aria-hidden />
+              {lead.owner ? `Owner: ${lead.owner.name}` : "Unassigned"}
+            </span>
+            {lead.source ? (
+              <span className="inline-flex items-center gap-1.5">
+                <Signpost className="size-3.5" aria-hidden />
+                {lead.source.name}
+              </span>
+            ) : null}
+          </span>
+        }
         breadcrumbs={[{ label: "Leads", href: "/leads" }, { label: lead.number }]}
         actions={
           <>

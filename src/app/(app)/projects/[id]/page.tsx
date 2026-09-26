@@ -208,7 +208,7 @@ export default async function ProjectDetailPage({ params }: PageProps<"/projects
             label: `Configurations & pricing (${project.configurations.length})`,
             content:
               project.configurations.length > 0 ? (
-                <div className="overflow-hidden rounded-lg border">
+                <div className="overflow-hidden rounded-xl border bg-card shadow-card">
                   <Table>
                     <TableHeader className="bg-muted/40">
                       <TableRow className="hover:bg-transparent">

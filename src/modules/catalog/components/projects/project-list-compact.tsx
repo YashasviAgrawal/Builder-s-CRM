@@ -19,7 +19,7 @@ import { InactiveBadge, ProjectStatusBadge } from "../shared/project-status-badg
 /** Small projects table for a builder's page. */
 export function ProjectListCompact({ projects }: { projects: ProjectRow[] }) {
   return (
-    <div className="overflow-hidden rounded-lg border">
+    <div className="overflow-hidden rounded-xl border bg-card shadow-card">
       <Table>
         <TableHeader className="bg-muted/40">
           <TableRow className="hover:bg-transparent">

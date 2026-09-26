@@ -280,7 +280,7 @@ export function InvoiceForm({
       </div>
 
       <div className="space-y-6">
-        <Card className="lg:sticky lg:top-4">
+        <Card className="lg:sticky lg:top-24">
           <CardHeader>
             <CardTitle>Totals</CardTitle>
             <CardDescription>The invoice number is given when it is issued.</CardDescription>

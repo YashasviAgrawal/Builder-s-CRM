@@ -89,7 +89,7 @@ export function LossReasonsManager({ reasons }: { reasons: LossReasonRow[] }) {
           <Plus /> Add reason
         </Button>
       </div>
-      <div className="rounded-lg border">
+      <div className="overflow-hidden rounded-xl border bg-card shadow-card">
         <Table>
           <TableHeader>
             <TableRow>

@@ -1,10 +1,22 @@
+import {
+  ArrowDownRight,
+  ArrowRight,
+  ArrowUpRight,
+  CalendarCheck2,
+  CalendarX2,
+  type LucideIcon,
+  Minus,
+  PhoneCall,
+  ThumbsDown,
+} from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { SkylineIllustration } from "@/components/shared/brand/skyline-illustration";
 import { BarList } from "@/components/shared/charts/bar-list";
 import { ColumnChart } from "@/components/shared/charts/column-chart";
 import { Funnel } from "@/components/shared/charts/funnel";
-import { StatTile } from "@/components/shared/charts/stat-tile";
+import { StatTile, type StatTone } from "@/components/shared/charts/stat-tile";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -15,6 +27,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatDateRangeLabel } from "@/lib/date-range";
+import { cn } from "@/lib/utils";
 
 import type { MetricKey } from "../metrics";
 import { METRICS } from "../metrics";
@@ -38,8 +51,8 @@ function Section({
 }) {
   return (
     <Card className={className}>
-      <CardHeader className="flex flex-row items-start justify-between gap-2">
-        <div className="space-y-1">
+      <CardHeader className="flex flex-row items-start justify-between gap-3">
+        <div className="min-w-0 flex-1 space-y-1">
           <CardTitle className="text-base">{title}</CardTitle>
           {description ? <CardDescription>{description}</CardDescription> : null}
         </div>
@@ -57,12 +70,31 @@ export function DashboardView({ data, widgets }: { data: DashboardData; widgets:
   const tile = (
     key: MetricKey & keyof typeof summary.change,
     value: ReactNode,
-    hint?: ReactNode,
-    href?: string,
+    hint: ReactNode,
+    href: string | undefined,
+    icon: LucideIcon,
+    tone: StatTone,
   ) => (
     <StatTile
       label={METRICS[key].label}
       value={value}
+      change={summary.change[key]}
+      higherIsBetter={METRICS[key].higherIsBetter}
+      hint={hint}
+      href={href}
+      icon={icon}
+      tone={tone}
+    />
+  );
+  const headline = (
+    key: MetricKey & keyof typeof summary.change,
+    value: number,
+    hint?: ReactNode,
+    href?: string,
+  ) => (
+    <HeroFigure
+      label={METRICS[key].label}
+      value={n(value)}
       change={summary.change[key]}
       higherIsBetter={METRICS[key].higherIsBetter}
       hint={hint}
@@ -78,39 +110,74 @@ export function DashboardView({ data, widgets }: { data: DashboardData; widgets:
 
   return (
     <div className="space-y-6">
-      <p className="text-xs text-muted-foreground">Changes compare with {previousLabel}.</p>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {tile("leadsAssigned", n(current.leadsAssigned), `${n(current.leadsCreated)} added`)}
+      <section
+        aria-label="Results of the period"
+        className="relative isolate overflow-hidden rounded-2xl bg-brand-deep p-6 text-white shadow-raised md:p-8"
+      >
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-10 bg-[radial-gradient(90%_130%_at_0%_0%,rgb(86_124_141/0.5),transparent_60%),radial-gradient(55%_90%_at_100%_110%,rgb(255_177_98/0.26),transparent_70%)]"
+        />
+        <SkylineIllustration
+          tone="inverse"
+          className="pointer-events-none absolute -right-4 -bottom-px -z-10 hidden w-[380px] opacity-90 xl:block"
+        />
+        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 xl:pr-[360px]">
+          <p className="text-sm font-medium text-white/80">
+            Results · {formatDateRangeLabel(data.period.range, "d MMM")}
+          </p>
+          <p className="text-xs text-white/65">Changes compare with {previousLabel}.</p>
+        </div>
+        <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-5 md:grid-cols-4 xl:pr-[360px]">
+          {headline("leadsAssigned", current.leadsAssigned, `${n(current.leadsCreated)} added`)}
+          {headline(
+            "visitsCompleted",
+            current.visitsCompleted,
+            `${n(current.revisitsCompleted)} revisits · ${n(current.visitsNoShow)} no-shows`,
+            "/visits",
+          )}
+          {headline(
+            "bookings",
+            current.bookings,
+            `${pct(current.visitToBooking)} of visits`,
+            "/bookings",
+          )}
+          {headline("closures", current.closures, undefined, "/bookings?status=CLOSED_WON")}
+        </div>
+      </section>
+
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         {tile(
           "calls",
           n(current.calls),
           `${n(current.callsConnected)} connected · ${pct(current.connectRate)}`,
           "/calls",
+          PhoneCall,
+          "blue",
         )}
         {tile(
           "followUpsCompleted",
           n(current.followUpsCompleted),
           `${n(current.followUpsDue)} due · ${pct(current.followUpAdherence)} on time`,
-        )}
-        {tile("followUpsMissed", n(current.followUpsMissed))}
-        {tile(
-          "visitsCompleted",
-          n(current.visitsCompleted),
-          `${n(current.revisitsCompleted)} revisits · ${n(current.visitsNoShow)} no-shows`,
-          "/visits",
+          undefined,
+          CalendarCheck2,
+          "green",
         )}
         {tile(
-          "bookings",
-          n(current.bookings),
-          `${pct(current.visitToBooking)} of visits`,
-          "/bookings",
+          "followUpsMissed",
+          n(current.followUpsMissed),
+          undefined,
+          undefined,
+          CalendarX2,
+          "orange",
         )}
-        {tile("closures", n(current.closures), undefined, "/bookings?status=CLOSED_WON")}
         {tile(
           "lost",
           n(current.lost),
           `${n(current.notInterested)} not interested`,
           "/leads?closure=lost",
+          ThumbsDown,
+          "red",
         )}
       </div>
 
@@ -120,12 +187,15 @@ export function DashboardView({ data, widgets }: { data: DashboardData; widgets:
             title="Today"
             description="Planned for today and still overdue."
             action={
-              <Link href="/agenda" className="text-sm text-primary hover:underline">
-                Open agenda
+              <Link
+                href="/agenda"
+                className="inline-flex shrink-0 items-center gap-1 text-sm font-medium whitespace-nowrap text-primary hover:underline"
+              >
+                Open agenda <ArrowRight className="size-3.5" aria-hidden />
               </Link>
             }
           >
-            <dl className="grid grid-cols-2 gap-4 text-sm">
+            <dl className="grid grid-cols-2 gap-2.5 text-sm">
               <Figure label="Follow-ups due" value={agenda.followUpsDue} />
               <Figure label="Callbacks due" value={agenda.callbacksDue} />
               <Figure label="Site visits" value={agenda.visitsToday} />
@@ -135,7 +205,7 @@ export function DashboardView({ data, widgets }: { data: DashboardData; widgets:
           </Section>
         ) : null}
         <Section title="Leads now" description="Where the leads stand, whatever the period.">
-          <dl className="grid grid-cols-2 gap-4 text-sm">
+          <dl className="grid grid-cols-2 gap-2.5 text-sm">
             <Figure label="Open" value={pipeline.open} href="/leads?open=true" />
             <Figure
               label="Pending"
@@ -290,6 +360,61 @@ function chartDescription(data: DashboardData) {
     : `Per ${data.period.granularity} of the period.`;
 }
 
+/** A headline figure on the dark hero: value, change vs the previous period (arrow + sign, never colour alone). */
+function HeroFigure({
+  label,
+  value,
+  change,
+  higherIsBetter,
+  hint,
+  href,
+}: {
+  label: string;
+  value: string;
+  change?: number | null;
+  higherIsBetter: boolean | null;
+  hint?: ReactNode;
+  href?: string;
+}) {
+  const good =
+    change === undefined || change === null || change === 0 || higherIsBetter === null
+      ? null
+      : change > 0 === higherIsBetter;
+  const Icon = !change ? Minus : change > 0 ? ArrowUpRight : ArrowDownRight;
+  const body = (
+    <>
+      <p className="text-sm text-white/75">{label}</p>
+      <p className="mt-1.5 text-4xl leading-none font-semibold tracking-tight">{value}</p>
+      <div className="mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-white/65">
+        {change !== undefined ? (
+          <span
+            className={cn(
+              "inline-flex items-center gap-0.5 rounded-full bg-white/10 px-1.5 py-0.5 font-semibold text-white/80 tabular-nums",
+              good === true && "text-[#a6ecc4]",
+              good === false && "text-[#ffc0b3]",
+            )}
+          >
+            <Icon className="size-3.5" aria-hidden />
+            {change === null ? "new" : `${change > 0 ? "+" : ""}${change}%`}
+            <span className="sr-only"> vs the previous period</span>
+          </span>
+        ) : null}
+        {hint ? <span>{hint}</span> : null}
+      </div>
+    </>
+  );
+  return href ? (
+    <Link
+      href={href}
+      className="-m-3 block rounded-xl p-3 transition-colors outline-none hover:bg-white/[0.07] focus-visible:ring-[3px] focus-visible:ring-white/40"
+    >
+      {body}
+    </Link>
+  ) : (
+    <div>{body}</div>
+  );
+}
+
 function Figure({
   label,
   value,
@@ -303,27 +428,40 @@ function Figure({
   href?: string;
   attention?: boolean;
 }) {
+  const warn = attention && value > 0;
   const content = (
     <>
-      <dt className="text-muted-foreground">{label}</dt>
+      <dt className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+        {warn ? <span aria-hidden className="size-1.5 rounded-full bg-highlight" /> : null}
+        {label}
+      </dt>
       <dd
-        className={
-          attention && value > 0
-            ? "text-xl font-semibold text-warning-foreground dark:text-warning"
-            : "text-xl font-semibold"
-        }
+        className={cn(
+          "mt-1 text-xl font-semibold tracking-tight",
+          warn && "text-warning-foreground dark:text-warning",
+        )}
       >
         {n(value)}
       </dd>
-      {hint ? <dd className="text-xs text-muted-foreground">{hint}</dd> : null}
+      {hint ? <dd className="mt-0.5 text-xs text-muted-foreground">{hint}</dd> : null}
     </>
   );
+  const panel = cn(
+    "block rounded-lg border border-border/70 bg-muted/50 px-3.5 py-3",
+    warn && "border-highlight/40 bg-highlight/10",
+  );
   return href ? (
-    <Link href={href} className="block rounded-md hover:bg-muted/50">
+    <Link
+      href={href}
+      className={cn(
+        panel,
+        "transition-colors hover:border-primary/25 hover:bg-accent/70 focus-visible:ring-[3px] focus-visible:ring-ring/40 focus-visible:outline-none",
+      )}
+    >
       {content}
     </Link>
   ) : (
-    <div>{content}</div>
+    <div className={panel}>{content}</div>
   );
 }
 

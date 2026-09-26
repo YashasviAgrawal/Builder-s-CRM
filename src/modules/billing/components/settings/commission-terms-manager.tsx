@@ -157,7 +157,7 @@ export function CommissionTermsManager({
           <Plus /> Add rate card
         </Button>
       </div>
-      <div className="rounded-lg border">
+      <div className="overflow-hidden rounded-xl border bg-card shadow-card">
         <Table>
           <TableHeader>
             <TableRow>

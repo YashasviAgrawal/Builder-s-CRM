@@ -74,7 +74,7 @@ export function PurposesManager({ purposes }: { purposes: FollowUpPurposeRow[] }
           <Plus /> Add purpose
         </Button>
       </div>
-      <div className="rounded-lg border">
+      <div className="overflow-hidden rounded-xl border bg-card shadow-card">
         <Table>
           <TableHeader>
             <TableRow>

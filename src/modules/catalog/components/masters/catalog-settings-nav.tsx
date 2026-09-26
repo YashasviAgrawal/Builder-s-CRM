@@ -14,7 +14,10 @@ const TABS = [
 export function CatalogSettingsNav() {
   const pathname = usePathname();
   return (
-    <nav aria-label="Project catalogue" className="mb-6 inline-flex rounded-lg bg-muted p-1">
+    <nav
+      aria-label="Project catalogue"
+      className="mb-6 inline-flex rounded-lg border border-border/70 bg-secondary/60 p-[3px]"
+    >
       {TABS.map((tab) => {
         const active = pathname === tab.href;
         return (
@@ -24,7 +27,7 @@ export function CatalogSettingsNav() {
             aria-current={active ? "page" : undefined}
             className={cn(
               "rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground",
-              active && "bg-background text-foreground shadow-sm",
+              active && "bg-card text-foreground shadow-card ring-1 ring-border/50",
             )}
           >
             {tab.label}

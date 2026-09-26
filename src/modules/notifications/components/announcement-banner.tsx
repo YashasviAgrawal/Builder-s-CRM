@@ -28,9 +28,11 @@ export function AnnouncementBanner({ announcements }: { announcements: MyAnnounc
         <section
           key={item.id}
           aria-label={`Announcement: ${item.title}`}
-          className="flex gap-3 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3"
+          className="flex gap-3 rounded-xl border bg-card px-4 py-3.5 shadow-card"
         >
-          <Megaphone className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-highlight/20 text-highlight-ink">
+            <Megaphone className="size-4" aria-hidden />
+          </span>
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold">{item.title}</p>
             <p className="line-clamp-2 text-sm whitespace-pre-line text-muted-foreground">

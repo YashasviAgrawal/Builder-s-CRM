@@ -156,7 +156,7 @@ export function ImportProgress({ batch }: { batch: ImportBatchDetail }) {
             </p>
           </CardHeader>
           <CardContent>
-            <div className="overflow-x-auto rounded-lg border">
+            <div className="overflow-x-auto rounded-xl border bg-card shadow-card">
               <Table>
                 <TableHeader>
                   <TableRow>

@@ -53,7 +53,7 @@ export default async function ExportsPage({ searchParams }: PageProps<"/reports/
           notification.
         </p>
       ) : null}
-      <div className="rounded-lg border">
+      <div className="overflow-hidden rounded-xl border bg-card shadow-card">
         <Table>
           <TableHeader>
             <TableRow>

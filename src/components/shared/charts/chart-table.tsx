@@ -15,10 +15,10 @@ export function ChartTable({
       <summary className="cursor-pointer text-xs text-muted-foreground hover:text-foreground">
         Show as table
       </summary>
-      <div className="mt-2 max-h-72 overflow-auto rounded-md border">
-        <table className="w-full text-left text-xs">
+      <div className="mt-2 max-h-72 overflow-auto rounded-lg border">
+        <table className="w-full text-left text-xs tabular-nums">
           <caption className="sr-only">{caption}</caption>
-          <thead className="sticky top-0 bg-muted">
+          <thead className="sticky top-0 bg-secondary">
             <tr>
               {headers.map((header, index) => (
                 <th

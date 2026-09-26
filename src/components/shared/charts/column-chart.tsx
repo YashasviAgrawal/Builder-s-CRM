@@ -122,7 +122,7 @@ export function ColumnChart({
           ))}
           {hovered ? (
             <div
-              className="pointer-events-none absolute z-10 min-w-32 rounded-md border bg-popover px-2.5 py-1.5 text-xs shadow-md"
+              className="pointer-events-none absolute z-10 min-w-36 rounded-xl border border-border/70 bg-popover px-3 py-2 text-xs shadow-overlay"
               style={{
                 left: `${((hover! + 0.5) / data.length) * 100}%`,
                 top: 0,
@@ -130,17 +130,19 @@ export function ColumnChart({
               }}
               role="status"
             >
-              <p className="mb-1 font-medium">{hovered.label}</p>
+              <p className="mb-1.5 font-medium text-muted-foreground">{hovered.label}</p>
               {series.map((entry) => (
-                <p key={entry.key} className="flex items-center justify-between gap-3">
-                  <span className="flex items-center gap-1.5 text-muted-foreground">
+                <p key={entry.key} className="flex items-center justify-between gap-4 py-0.5">
+                  <span className="flex items-center gap-2 text-muted-foreground">
                     <span
-                      className="inline-block size-2 rounded-[2px]"
+                      className="inline-block h-0.5 w-3 rounded-full"
                       style={{ background: seriesColor(entry.slot) }}
                     />
                     {entry.label}
                   </span>
-                  <span className="tabular-nums">{format(hovered.values[entry.key] ?? 0)}</span>
+                  <span className="font-semibold text-foreground tabular-nums">
+                    {format(hovered.values[entry.key] ?? 0)}
+                  </span>
                 </p>
               ))}
             </div>

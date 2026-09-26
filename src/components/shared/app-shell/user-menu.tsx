@@ -1,6 +1,6 @@
 "use client";
 
-import { CircleUser, LogOut, Settings } from "lucide-react";
+import { ChevronDown, CircleUser, LogOut, Settings } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -34,20 +34,30 @@ export function UserMenu({ user }: { user: ShellUser }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-9 gap-2 px-2" aria-label="Open user menu">
-          <Avatar className="size-7">
+        <Button
+          variant="ghost"
+          className="h-11 gap-2.5 py-1 pr-2 pl-1 md:pr-3"
+          aria-label="Open user menu"
+        >
+          <Avatar className="size-9 ring-2 ring-card">
             {user.avatarUrl ? <AvatarImage src={user.avatarUrl} alt="" /> : null}
-            <AvatarFallback className="bg-primary/10 text-primary">
+            <AvatarFallback className="bg-primary text-primary-foreground">
               {initials(user.name)}
             </AvatarFallback>
           </Avatar>
-          <span className="hidden max-w-40 truncate text-sm font-medium md:inline">
-            {user.name}
+          <span className="hidden max-w-44 flex-col items-start leading-tight md:flex">
+            <span className="max-w-full truncate text-sm font-semibold">{user.name}</span>
+            {user.subtitle ? (
+              <span className="max-w-full truncate text-xs font-normal text-muted-foreground">
+                {user.subtitle}
+              </span>
+            ) : null}
           </span>
+          <ChevronDown className="hidden size-4 text-muted-foreground md:block" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-60">
-        <DropdownMenuLabel className="flex flex-col">
+      <DropdownMenuContent align="end" className="w-64">
+        <DropdownMenuLabel className="flex flex-col gap-0.5 py-2">
           <span className="truncate">{user.name}</span>
           {user.email ? (
             <span className="truncate text-xs font-normal text-muted-foreground">{user.email}</span>
