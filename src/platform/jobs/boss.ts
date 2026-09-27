@@ -51,17 +51,23 @@ export function getBoss(role: BossRole = "web"): Promise<PgBoss> {
   return globalForBoss.__crmBoss;
 }
 
-/** Creates the queue for every registered job and event handler (no-op for existing queues). */
+/**
+ * Creates the queue for every registered job and event handler that does not exist yet. One lookup instead of a
+ * `createQueue` per queue (a no-op for existing ones anyway): every serverless cold start and job window runs this,
+ * and each statement is a round trip to the database.
+ */
 export async function ensureQueues(boss: PgBoss): Promise<void> {
   const registry = getServerRegistry();
-  for (const job of registry.jobs) {
-    await boss.createQueue(job.name, { ...DEFAULT_QUEUE_OPTIONS, ...job.queue });
-  }
-  for (const handler of registry.eventHandlers) {
-    await boss.createQueue(eventHandlerQueueName(handler.name), {
-      ...DEFAULT_QUEUE_OPTIONS,
-      ...handler.queue,
-    });
+  const wanted = [
+    ...registry.jobs.map((job) => ({ name: job.name, options: job.queue })),
+    ...registry.eventHandlers.map((handler) => ({
+      name: eventHandlerQueueName(handler.name),
+      options: handler.queue,
+    })),
+  ];
+  const existing = new Set((await boss.getQueues()).map((queue) => queue.name));
+  for (const { name, options } of wanted) {
+    if (!existing.has(name)) await boss.createQueue(name, { ...DEFAULT_QUEUE_OPTIONS, ...options });
   }
 }
 
