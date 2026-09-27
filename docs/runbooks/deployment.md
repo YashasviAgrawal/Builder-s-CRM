@@ -64,6 +64,37 @@ database — no extra infrastructure. Expose it through the same reverse proxy; 
 partner addresses should reach it. Lead imports and API housekeeping run in the worker, so keep at least one worker
 instance running.
 
+## Serverless hosting (Vercel) — jobs without a worker process
+
+Vercel cannot keep the worker running, and without it no e-mail, reminder, notification, import or export is ever
+processed (the web app only queues them). Instead, `/api/jobs/run` runs the worker for about 45 seconds per call;
+call it every minute and the jobs are handled with at most about a minute's delay.
+
+1. Set `CRON_SECRET` (`openssl rand -base64 32`) in the Vercel project's environment variables and redeploy. The route
+   answers 404 while it is not set.
+2. In Supabase → Database → Extensions, enable `pg_cron` and `pg_net`.
+3. In the Supabase SQL editor, schedule the call (replace the domain and the secret):
+
+   ```sql
+   select cron.schedule(
+     'crm-run-jobs',
+     '* * * * *',
+     $$
+     select net.http_post(
+       url := 'https://crm.example.com/api/jobs/run',
+       headers := jsonb_build_object('Authorization', 'Bearer <CRON_SECRET>')
+     );
+     $$
+   );
+   ```
+
+4. Verify: `GET /api/health` shows the worker as ok within a minute (heartbeat id `serverless`), and
+   `select status_code, content from net._http_response order by created desc limit 5;` shows `202`.
+   To stop it: `select cron.unschedule('crm-run-jobs');`.
+
+Limits: a job still running when the window closes is retried by a later run, so very large imports or exports take
+longer than with a dedicated worker. Keep the `maxDuration` of the route (60 s) within the Vercel plan's limit.
+
 ## Rollback
 
 Redeploy the previous images. Only roll back migrations with a prepared down-migration; prefer forward fixes.

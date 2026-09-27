@@ -60,6 +60,11 @@ export const env = createEnv({
 
     JOBS_SCHEMA: z.string().min(1).default("pgboss"),
     WORKER_CONCURRENCY: z.coerce.number().int().min(1).max(50).default(5),
+    /**
+     * Enables /api/jobs/run, which runs background jobs for a minute per call on hosts without a worker process
+     * (Vercel). Callers send it as a Bearer token. At least 32 characters: `openssl rand -base64 32`.
+     */
+    CRON_SECRET: z.string().min(32).optional(),
   },
   client: {
     NEXT_PUBLIC_APP_NAME: z.string().min(1).default("Builder Channel CRM"),

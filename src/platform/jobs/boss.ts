@@ -19,7 +19,11 @@ export type BossRole = "web" | "worker";
 
 const globalForBoss = globalThis as unknown as { __crmBoss?: Promise<PgBoss> };
 
-async function startBoss(role: BossRole): Promise<PgBoss> {
+/**
+ * Starts a new pg-boss instance of the given role. Most callers want the process-wide `getBoss()`; this is for a
+ * short-lived instance the caller stops itself (the serverless job window, `run-window.ts`).
+ */
+export async function startBoss(role: BossRole): Promise<PgBoss> {
   const boss = new PgBoss({
     connectionString: env.DATABASE_URL,
     schema: env.JOBS_SCHEMA,

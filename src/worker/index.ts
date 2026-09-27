@@ -12,6 +12,7 @@ import { env } from "@/config/env";
 import { getServerRegistry } from "@/modules/registry.server";
 import { prisma } from "@/platform/db/client";
 import { getBoss, stopBoss } from "@/platform/jobs/boss";
+import { recordWorkerHeartbeat } from "@/platform/jobs/heartbeat";
 import { startJobWorkers } from "@/platform/jobs/runner";
 import { logger } from "@/platform/logger";
 import { getStorage } from "@/platform/storage";
@@ -20,21 +21,7 @@ const HEARTBEAT_INTERVAL_MS = 30_000;
 const workerId = `${hostname()}:${process.pid}`;
 const startedAt = new Date();
 
-async function heartbeat() {
-  const registry = getServerRegistry();
-  await prisma.workerHeartbeat.upsert({
-    where: { id: workerId },
-    create: {
-      id: workerId,
-      hostname: hostname(),
-      pid: process.pid,
-      startedAt,
-      lastSeenAt: new Date(),
-      info: { jobs: registry.jobs.length, eventHandlers: registry.eventHandlers.length },
-    },
-    update: { lastSeenAt: new Date() },
-  });
-}
+const heartbeat = () => recordWorkerHeartbeat(workerId, startedAt);
 
 async function main() {
   const registry = getServerRegistry();
