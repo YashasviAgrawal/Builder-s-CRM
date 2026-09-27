@@ -27,8 +27,8 @@ export const env = createEnv({
      */
     DB_TRANSACTION_TIMEOUT_MS: z.coerce.number().int().min(1000).default(30_000),
     /**
-     * Most database connections one process keeps open. Hosted poolers cap clients across every process (Supabase's
-     * session pooler: 15 on small plans), so web + worker + scripts must stay under that cap together.
+     * Most database connections one process keeps open. Behind a session pooler (Supabase port 5432: 15 clients on
+     * small plans) web + worker + scripts must stay under the cap together — prefer the transaction pooler (6543).
      */
     DATABASE_POOL_MAX: z.coerce.number().int().min(1).max(100).default(10),
     DB_TRANSACTION_MAX_WAIT_MS: z.coerce.number().int().min(1000).default(15_000),

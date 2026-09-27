@@ -4,6 +4,8 @@
  *
  *   pnpm dev:worker   (watch mode)      pnpm worker   (production)
  */
+import "./service-name";
+
 import { hostname } from "node:os";
 
 import { env } from "@/config/env";

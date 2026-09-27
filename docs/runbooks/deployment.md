@@ -15,7 +15,10 @@
 
 See `.env.example` for the full, documented list. Production essentials:
 
-- `DATABASE_URL` — PostgreSQL connection string (use SSL).
+- `DATABASE_URL` — PostgreSQL connection string (use SSL). Behind a pooler use transaction mode (Supabase: port
+  6543); a session pooler caps clients across every web and worker instance.
+- `DIRECT_URL` — session or direct connection for the `migrate` image (Supabase: port 5432), since migrations take
+  session-level locks. Defaults to `DATABASE_URL`.
 - `APP_URL` — public HTTPS URL (enables HSTS and `upgrade-insecure-requests`).
 - `STORAGE_DRIVER=s3`, `S3_ENDPOINT` (omit for AWS), `S3_PUBLIC_ENDPOINT` (if different), `S3_REGION`, `S3_BUCKET`,
   `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_FORCE_PATH_STYLE` (`false` for AWS).

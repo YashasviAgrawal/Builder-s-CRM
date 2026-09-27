@@ -11,7 +11,8 @@ export default async function setup() {
   if (!url) throw new Error("TEST_DATABASE_URL is not set");
 
   execSync("pnpm exec prisma migrate deploy", {
-    env: { ...process.env, DATABASE_URL: url },
+    // prisma.config.ts prefers DIRECT_URL (possibly loaded from .env): point both at the test database.
+    env: { ...process.env, DATABASE_URL: url, DIRECT_URL: url },
     stdio: "pipe",
   });
 

@@ -2,7 +2,9 @@ import "dotenv/config";
 
 import { defineConfig } from "prisma/config";
 
-const databaseUrl = process.env.DATABASE_URL;
+// The CLI (migrate, studio) needs a session connection: migrations take session-level advisory locks, which a
+// transaction pooler (e.g. Supabase port 6543) does not support. The app itself connects through DATABASE_URL.
+const databaseUrl = process.env.DIRECT_URL ?? process.env.DATABASE_URL;
 
 export default defineConfig({
   // Multi-file schema: one file per module (BUILD_PLAN §2.3).
